@@ -1,8 +1,8 @@
 # submit.py
 
-![requires-python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fsmjc-org%2Fpy-submit%2Frefs%2Fheads%2Fmain%2Fpython%2Fsubmit%2Fpyproject.toml)
-![version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsmjc-org%2Fpy-submit%2Frefs%2Fheads%2Fmain%2Fpython%2Fsubmit%2Fpyproject.toml&query=%24.project.version&label=version)
-![license](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsmjc-org%2Fpy-submit%2Frefs%2Fheads%2Fmain%2Fpython%2Fsubmit%2Fpyproject.toml&query=%24.project.license.text&label=license)
+![requires-python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fsmjc-org%2Fpy-submit%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
+![version](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fsmjc-org%2Fpy-submit%2Frefs%2Fheads%2Fmain%2Fpyproject.toml&query=%24.project.version&label=version)
+![GitHub License](https://img.shields.io/github/license/smjc-org/py-submit)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
