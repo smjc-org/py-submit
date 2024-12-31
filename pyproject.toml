@@ -12,7 +12,7 @@ dependencies = [
     "chardet>=5.2.0",
 ]
 authors = [{ name = "Snoopy1866", email = "1753199432@qq.com"}]
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 keywords = ["sas", "nmpa", "regulatory", "guidelines", "submit"]
 classifiers = [
   "Development Status :: 4 - Beta",
