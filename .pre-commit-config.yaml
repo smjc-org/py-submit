@@ -4,6 +4,7 @@ ci:
     chore: auto fixes from pre-commit hooks
 
     for more information, see https://pre-commit.ci
+  autoupdate_commit_msg: "chore: pre-commit autoupdate"
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
