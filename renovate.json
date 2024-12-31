@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": false,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchManagers": ["pyenv"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["pep621"],
+      "addLabels": ["deps-python"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["deps-ci"]
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "addLabels": ["deps-dev"]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "submit"
+version = "0.3.0"
+description = "Extract code block which should be submitted to regulatory agency."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "chardet>=5.2.0",
+]
+authors = [{ name = "Snoopy1866", email = "1753199432@qq.com"}]
+license = {text = "MIT"}
+keywords = ["sas", "nmpa", "regulatory", "guidelines", "submit"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/smjc-org/py-submit/tree/main"
+Documentation = "https://github.com/smjc-org/py-submit/blob/main/README.md"
+Repository = "https://github.com/smjc-org/py-submit.git"
+Issues = "https://github.com/smjc-org/py-submit/issues"
+Changelog = "https://github.com/smjc-org/py-submit/tree/main/CHANGELOG.md"
+
+[project.scripts]
+submit = "submit:main"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "ruff>=0.8.3",
+    "setuptools>=75.6.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q -l --tb=auto --color=yes"
+testpaths = ["tests"]
+pythonpath = [""]
+verbosity_test_cases = 2
+verbosity_assertions = 2
+
+[tool.ruff]
+line-length = 120

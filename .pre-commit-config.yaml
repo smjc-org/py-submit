@@ -1,0 +1,47 @@
+ci:
+  skip: [renovate-config-validator]
+  autofix_commit_msg: |
+    chore: auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-illegal-windows-names
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: forbid-submodules
+
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 39.82.3
+    hooks:
+      - id: renovate-config-validator
+        files: renovate.json
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.5.11
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        types_or: [python, pyi]
+        args: [--fix]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  - repo: https://github.com/opensource-nepal/commitlint
+    rev: v1.3.0
+    hooks:
+      - id: commitlint
