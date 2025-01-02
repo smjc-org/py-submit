@@ -227,6 +227,7 @@ submit copydir "/source" "/dest" --merge "code.txt"
 > [!NOTE]
 >
 > 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*======`_`filename`_`.txt======*/` 分隔来自不同 `.sas` 文件的代码。
+> 其中 _`filename`_ 是源目录中 `.sas` 文件名称（不含扩展名）。
 
 > [!NOTE]
 >
