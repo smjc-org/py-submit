@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import argparse
+import glob
 import os
 import re
 from enum import IntFlag, auto
@@ -55,6 +56,22 @@ class ConvertMode(IntFlag):
         modes = [mode for mode in cls]
         modes.append(ConvertMode.BOTH)
         return modes
+
+
+def expand_glob_patterns(patterns: list[str], root_dir: str) -> list[str]:
+    """扩展 glob 模式。
+
+    Args:
+        patterns (list[str]): glob 模式列表。
+        root_dir (str): 根目录。
+
+    Returns:
+        list[str]: 文件路径列表。
+    """
+    path = []
+    for pattern in patterns:
+        path.extend(glob.glob(pattern, root_dir=root_dir, recursive=True))
+    return path
 
 
 def copy_file(
@@ -132,6 +149,12 @@ def copy_directory(
         return
     if not os.path.exists(txt_dir):
         os.makedirs(txt_dir)
+
+    if exclude_dirs:
+        exclude_dirs = expand_glob_patterns(exclude_dirs, root_dir=sas_dir)
+
+    if exclude_files:
+        exclude_files = expand_glob_patterns(exclude_files, root_dir=sas_dir)
 
     for dirpath, _, filenames in os.walk(sas_dir):
         if exclude_dirs is not None and os.path.split(dirpath)[-1] in exclude_dirs:

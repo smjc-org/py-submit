@@ -247,7 +247,7 @@ submit copydir "/source" "/dest" --merge "code.txt"
 
 #### --exclude-dirs
 
-`--exclude-dirs` 选项指定排除的目录列表，这些目录中的文件将会被跳过处理。
+`--exclude-dirs` 选项指定排除的目录列表，这些目录中的文件将会被跳过处理。该选项支持 `glob` 模式，详见 [glob 模式介绍](#glob-模式介绍)。
 
 ```bash
 submit copydir "/source" "/dest" --exclude-dirs macro
@@ -263,13 +263,63 @@ submit copydir "/source" "/dest" --exclude-dirs macro qc initial
 
 #### --exclude-files
 
-`--exclude-files` 选项指定排除的文件列表，这些文件将会被跳过处理。
+`--exclude-files` 选项指定排除的文件列表，这些文件将会被跳过处理。该选项支持 `glob` 模式，详见 [glob 模式介绍](#glob-模式介绍)。
 
 ```bash
 submit copydir "/source" "/dest" --exclude-dirs macro --exclude-files fcmp.sas format.sas
 ```
 
 上述命令将在目录名称匹配 `macro` 时跳过处理其中的文件，并在文件名称匹配 `fcmp.sas` 或 `format.sas` （无论是否在 `macro` 目录中）时跳过处理。
+
+### glob 模式介绍
+
+`glob` 是一种使用通配符指定文件（目录）名称集合的模式，查看 [wiki](<https://en.wikipedia.org/wiki/Glob_(programming)>)。
+
+你可以在路径中使用以下特殊字符作为通配符：
+
+- `*`: 匹配零个或多个字符，但不匹配路径分隔符 `/`。例如，`f*.sas` 匹配 `f1.sas`、`f2.sas`、`f3.sas` 等等。
+- `**`: 匹配零个或多个任意字符。例如，`**/f*.sas` 匹配 `figure/f1.sas`、`figure/f2.sas`、`figure/draft/f1.sas` 等等。
+- `?`: 匹配前面字符的零个或一个。例如，`t10?.sas` 匹配 `t1.sas` 和 `t10.sas`。
+- `+`: 匹配前面字符的一个或多个。例如，`t10+.sas` 匹配 `t10.sas`、`t100.sas`、`t1000.sas` 等等。
+- `[]`: 匹配括号中列出的或包括在范围内的任一字母数字字符。范围只能包含 `a-z`、`A-Z`、`0-9`。例如，`t[1-3]0.sas` 匹配 `t10.sas`、`t20.sas`、`t30.sas`。
+
+假设有这样一个文件结构：
+
+```
+D:.
+├─source
+│  ├─f1.sas
+│  ├─f2.sas
+│  ├─f2-deprecated.sas
+│  ├─f3.sas
+│  ├─f3-deprecated.sas
+│  ├─t1.sas
+│  ├─t2.sas
+│  ├─t2-deprecated.sas
+│  ├─t2-deprecated-20241221.sas
+│  ├─t3.sas
+│  ├─t4.sas
+│  ├─t5.sas
+│  ├─t5-deprecated.sas
+│  ├─t6.sas
+│  ├─t7.sas
+│  └─t7-deprecated.sas
+└─dest
+```
+
+现在需要将 `source` 目录中的 `.sas` 文件转换为 `.txt` 文件，但忽略名称包含 `deprecated` 的文件。
+
+如果不使用 `glob` 模式，命令应该是这样的：
+
+```bash
+submit copydir source dest --exclude-files "f2-deprecated.sas" "f3-deprecated.sas" "t2-deprecated.sas" "t2-deprecated-20241221.sas" "t5-deprecated.sas" "t7-deprecated.sas"
+```
+
+使用 `glob` 模式，命令得到简化：
+
+```bash
+submit copydir source dest --exclude-files "*-deprecated*.sas"
+```
 
 ### 命令行选项参考
 
