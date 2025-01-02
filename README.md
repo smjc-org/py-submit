@@ -279,8 +279,7 @@ submit copydir "/source" "/dest" --exclude-dirs macro --exclude-files fcmp.sas f
 
 - `*`: 匹配零个或多个字符，但不匹配路径分隔符 `/`。例如，`f*.sas` 匹配 `f1.sas`、`f2.sas`、`f3.sas` 等等。
 - `**`: 匹配零个或多个任意字符。例如，`**/f*.sas` 匹配 `figure/f1.sas`、`figure/f2.sas`、`figure/draft/f1.sas` 等等。
-- `?`: 匹配前面字符的零个或一个。例如，`t10?.sas` 匹配 `t1.sas` 和 `t10.sas`。
-- `+`: 匹配前面字符的一个或多个。例如，`t10+.sas` 匹配 `t10.sas`、`t100.sas`、`t1000.sas` 等等。
+- `?`: 匹配零个或一个任意字符。例如，`t1?.sas` 匹配 `t1.sas`、`t10.sas`、`t11.sas` 等等。
 - `[]`: 匹配括号中列出的或包括在范围内的任一字母数字字符。范围只能包含 `a-z`、`A-Z`、`0-9`。例如，`t[1-3]0.sas` 匹配 `t10.sas`、`t20.sas`、`t30.sas`。
 
 假设有这样一个文件目录结构：
