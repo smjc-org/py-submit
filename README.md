@@ -293,7 +293,7 @@ options:
 #### submit copydir
 
 ```bash
-usage: submit [options] copydir [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] [-exf [EXCLUDE_FILES ...]] [-exd [EXCLUDE_DIRS ...]] sas_dir txt_dir
+usage: submit [options] copydir [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] [-mrg MERGE] [-exf [EXCLUDE_FILES ...]] [-exd [EXCLUDE_DIRS ...]] sas_dir txt_dir
 
 positional arguments:
   sas_dir               SAS 文件目录
@@ -306,6 +306,7 @@ options:
   --macro-subs MACRO_SUBS
                         宏变量替换，格式为 {key=value,...}（默认无）
   --encoding ENCODING   编码格式（默认自动检测）
+  -mrg, --merge MERGE   合并到一个文件（默认无）
   -exf, --exclude-files [EXCLUDE_FILES ...]
                         排除文件列表（默认无）
   -exd, --exclude-dirs [EXCLUDE_DIRS ...]
