@@ -283,7 +283,7 @@ submit copydir "/source" "/dest" --exclude-dirs macro --exclude-files fcmp.sas f
 - `+`: 匹配前面字符的一个或多个。例如，`t10+.sas` 匹配 `t10.sas`、`t100.sas`、`t1000.sas` 等等。
 - `[]`: 匹配括号中列出的或包括在范围内的任一字母数字字符。范围只能包含 `a-z`、`A-Z`、`0-9`。例如，`t[1-3]0.sas` 匹配 `t10.sas`、`t20.sas`、`t30.sas`。
 
-假设有这样一个文件结构：
+假设有这样一个文件目录结构：
 
 ```
 D:.
