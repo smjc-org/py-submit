@@ -222,15 +222,7 @@ def main() -> None:
     parser_dir.add_argument("-exf", "--exclude-files", nargs="*", default=None, help="排除文件列表（默认无）")
     parser_dir.add_argument("-exd", "--exclude-dirs", nargs="*", default=None, help="排除目录列表（默认无）")
 
-    args = parser.parse_args(
-        [
-            "copydir",
-            r"D:\OneDrive\统计部\项目\IVD\2023\01 北京倍肯恒业-抗凝血酶测定试剂盒（发色底物法）\04 统计分析\05 TFL程序\01 主程序",
-            r"D:\OneDrive\统计部\项目\IVD\2023\01 北京倍肯恒业-抗凝血酶测定试剂盒（发色底物法）\04 统计分析\05 TFL程序\01 主程序\tmp",
-            "--merge",
-            "code.txt",
-        ]
-    )
+    args = parser.parse_args()
 
     if args.command == "copyfile":
         copy_file(
