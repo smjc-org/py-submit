@@ -224,6 +224,27 @@ submit copydir "/source" "/dest"
 
 同 [`--encoding`](#--encoding)
 
+#### --merge
+
+`--merge` 选项指定将所有 `.sas` 文件进行转换后合并到单个 `.txt` 文件。
+
+例如：
+
+```bash
+submit copydir "/source" "/dest" --merge "code.txt"
+```
+
+上述代码会将 `/source` 目录中的所有 `.sas` 文件转换成 `.txt` 文件，并将转换后的 `.txt` 文件合并到 `/dest/code.txt` 中。
+
+> [!NOTE]
+>
+> 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*======`_`filename`_`.txt======*/` 分隔来自不同 `.sas` 文件的代码。
+> 其中 _`filename`_ 是源目录中 `.sas` 文件名称（不含扩展名）。
+
+> [!IMPORTANT]
+>
+> 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
+
 #### --exclude-dirs
 
 `--exclude-dirs` 选项指定排除的目录列表，这些目录中的文件将会被跳过处理。
@@ -273,7 +294,7 @@ options:
 #### submit copydir
 
 ```bash
-usage: submit [options] copydir [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] [-exf [EXCLUDE_FILES ...]] [-exd [EXCLUDE_DIRS ...]] sas_dir txt_dir
+usage: submit [options] copydir [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] [-mrg MERGE] [-exf [EXCLUDE_FILES ...]] [-exd [EXCLUDE_DIRS ...]] sas_dir txt_dir
 
 positional arguments:
   sas_dir               SAS 文件目录
@@ -286,6 +307,7 @@ options:
   --macro-subs MACRO_SUBS
                         宏变量替换，格式为 {key=value,...}（默认无）
   --encoding ENCODING   编码格式（默认自动检测）
+  -mrg, --merge MERGE   合并到一个文件（默认无）
   -exf, --exclude-files [EXCLUDE_FILES ...]
                         排除文件列表（默认无）
   -exd, --exclude-dirs [EXCLUDE_DIRS ...]
