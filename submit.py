@@ -7,6 +7,7 @@ import re
 from enum import IntFlag, auto
 
 from chardet import detect
+from natsort import natsorted
 
 SYLBOMS = r"[\s\*\-\=]"
 
@@ -106,6 +107,7 @@ def copy_file(
 def copy_directory(
     sas_dir: str,
     txt_dir: str,
+    merge: str | None = None,
     convert_mode: ConvertMode = ConvertMode.BOTH,
     macro_subs: dict[str, str] | None = None,
     exclude_files: list[str] = None,
@@ -117,6 +119,7 @@ def copy_directory(
     Args:
         sas_dir (str): SAS 文件夹路径。
         txt_dir (str): TXT 文件夹路径。
+        merge (str | None, optional): 合并到一个文件，默认值为 None。
         convert_mode (ConvertMode, optional): 转换模式，默认值为 ConvertMode.BOTH。
         macro_subs (dict[str, str] | None, optional): 一个字典，其键为 SAS 代码中的宏变量名称，值为替代的字符串，默认值为 None。
         exclude_files (list[str], optional): 排除文件列表，默认值为 None。
@@ -141,6 +144,26 @@ def copy_directory(
                 sas_file = os.path.join(dirpath, file)
                 txt_file = os.path.join(txt_dir, ref_path, file.replace(".sas", ".txt"))
                 copy_file(sas_file, txt_file, convert_mode=convert_mode, macro_subs=macro_subs, encoding=encoding)
+
+    if merge is not None:
+        merge_file = os.path.join(txt_dir, merge)
+        with open(merge_file, "w", encoding=encoding) as f:
+            for dirpath, _, filenames in os.walk(txt_dir):
+                filenames = natsorted(filenames)
+                for file in filenames:
+                    if file.endswith(".txt") and file != merge:
+                        txt_file = os.path.join(dirpath, file)
+                        with open(txt_file, "r", encoding=encoding) as txt:
+                            f.write(f"/*======{file}======*/\n")
+                            f.write(txt.read())
+                            f.write("\n")
+
+        for dirpath, _, filenames in os.walk(txt_dir):
+            filenames = natsorted(filenames)
+            for file in filenames:
+                if file.endswith(".txt") and file != merge:
+                    txt_file = os.path.join(dirpath, file)
+                    os.remove(txt_file)
 
 
 def parse_dict(arg: str) -> dict[str, str]:
@@ -195,10 +218,19 @@ def main() -> None:
     parser_dir = subparsers.add_parser("copydir", aliases=["cpd"], parents=[parent_parser], help="多个 SAS 文件转换")
     parser_dir.add_argument("sas_dir", help="SAS 文件目录")
     parser_dir.add_argument("txt_dir", help="TXT 文件目录")
+    parser_dir.add_argument("-mrg", "--merge", default=None, help="合并到一个文件（默认无）")
     parser_dir.add_argument("-exf", "--exclude-files", nargs="*", default=None, help="排除文件列表（默认无）")
     parser_dir.add_argument("-exd", "--exclude-dirs", nargs="*", default=None, help="排除目录列表（默认无）")
 
-    args = parser.parse_args()
+    args = parser.parse_args(
+        [
+            "copydir",
+            r"D:\OneDrive\统计部\项目\IVD\2023\01 北京倍肯恒业-抗凝血酶测定试剂盒（发色底物法）\04 统计分析\05 TFL程序\01 主程序",
+            r"D:\OneDrive\统计部\项目\IVD\2023\01 北京倍肯恒业-抗凝血酶测定试剂盒（发色底物法）\04 统计分析\05 TFL程序\01 主程序\tmp",
+            "--merge",
+            "code.txt",
+        ]
+    )
 
     if args.command == "copyfile":
         copy_file(
@@ -212,6 +244,7 @@ def main() -> None:
         copy_directory(
             sas_dir=args.sas_dir,
             txt_dir=args.txt_dir,
+            merge=args.merge,
             convert_mode=args.convert_mode,
             macro_subs=args.macro_subs,
             exclude_files=args.exclude_files,

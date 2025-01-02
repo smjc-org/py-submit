@@ -212,6 +212,26 @@ submit copyfile --convert-mode negative --encoding gbk
 submit copydir "/source" "/dest"
 ```
 
+#### --merge
+
+`--merge` 选项指定将所有 `.sas` 文件进行转换后合并到单个 `.txt` 文件。
+
+例如：
+
+```bash
+submit copydir "/source" "/dest" --merge "code.txt"
+```
+
+上述代码会将 `/source` 目录中的所有 `.sas` 文件转换成 `.txt` 文件，并将转换后的 `.txt` 文件合并到 `/dest/code.txt` 中。
+
+> [!NOTE]
+>
+> 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*======`_`filename`_`.txt======*/` 分隔来自不同 `.sas` 文件的代码。
+
+> [!NOTE]
+>
+> 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
+
 #### --convert-mode
 
 同 [`--convert-mode`](#--convert-mode)
