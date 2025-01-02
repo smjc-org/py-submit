@@ -212,6 +212,18 @@ submit copyfile --convert-mode negative --encoding gbk
 submit copydir "/source" "/dest"
 ```
 
+#### --convert-mode
+
+同 [`--convert-mode`](#--convert-mode)
+
+#### --macro-subs
+
+同 [`--macro-subs`](#--macro-subs)
+
+#### --encoding
+
+同 [`--encoding`](#--encoding)
+
 #### --merge
 
 `--merge` 选项指定将所有 `.sas` 文件进行转换后合并到单个 `.txt` 文件。
@@ -232,18 +244,6 @@ submit copydir "/source" "/dest" --merge "code.txt"
 > [!NOTE]
 >
 > 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
-
-#### --convert-mode
-
-同 [`--convert-mode`](#--convert-mode)
-
-#### --macro-subs
-
-同 [`--macro-subs`](#--macro-subs)
-
-#### --encoding
-
-同 [`--encoding`](#--encoding)
 
 #### --exclude-dirs
 
