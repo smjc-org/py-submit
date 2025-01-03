@@ -7,6 +7,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![pytest](https://github.com/smjc-org/py-submit/actions/workflows/pytest.yml/badge.svg)](https://github.com/smjc-org/py-submit/actions/workflows/pytest.yml)
+[![codecov](https://codecov.io/gh/smjc-org/py-submit/graph/badge.svg?token=MNWAUJ35HT)](https://codecov.io/gh/smjc-org/py-submit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/smjc-org/py-submit/main.svg)](https://results.pre-commit.ci/latest/github/smjc-org/py-submit/main)
 
 本程序用于从 `.sas` 文件中提取需要递交至监管机构的代码，并另存为 `.txt` 格式的文件。
