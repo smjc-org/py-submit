@@ -27,7 +27,7 @@ pip install git+https://github.com/smjc-org/py-submit.git@0.5.1
 pip install git+https://github.com/smjc-org/py-submit.git@03c8953663c8d9f6cb71a925df4fa1da7ca34cc3
 ```
 
-上述命令会将本程序安装到环境变量中 Python 脚本指定的目录下，后续可直接通过 `submit` 命令调用。
+上述命令会将本程序安装到环境变量中指定的目录下，后续可直接通过 `submit` 命令调用。
 
 > [!NOTE]
 >
