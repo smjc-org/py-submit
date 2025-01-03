@@ -31,7 +31,7 @@ pip install git+https://github.com/smjc-org/py-submit.git@03c8953663c8d9f6cb71a9
 
 > [!NOTE]
 >
-> 对于 Windows 用户，你可以在 `%LOCALAPPDATA%/Programs/Python/Python313/Scripts` 中看到 `submit.exe`，该目录默认情况下会被添加到环境变量中。
+> 对于 Windows 用户，你可以在 `%LOCALAPPDATA%/Programs/Python/Python313/Scripts` 中看到 `submit.exe`，你在终端执行 `submit` 命令实际上调用的是这个程序。
 
 ## 如何使用
 
