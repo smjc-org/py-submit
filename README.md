@@ -277,10 +277,12 @@ submit copydir "/source" "/dest" --exclude-dirs macro --exclude-files fcmp.sas f
 
 你可以在路径中使用以下特殊字符作为通配符：
 
-- `*`: 匹配零个或多个字符，但不匹配路径分隔符 `/`。例如，`f*.sas` 匹配 `f1.sas`、`f2.sas`、`f3.sas` 等等。
-- `**`: 匹配零个或多个任意字符。例如，`**/f*.sas` 匹配 `figure/f1.sas`、`figure/f2.sas`、`figure/draft/f1.sas` 等等。
-- `?`: 匹配零个或一个任意字符。例如，`t1?.sas` 匹配 `t1.sas`、`t10.sas`、`t11.sas` 等等。
-- `[]`: 匹配括号中列出的或包括在范围内的任一字母数字字符。范围只能包含 `a-z`、`A-Z`、`0-9`。例如，`t[1-3]0.sas` 匹配 `t10.sas`、`t20.sas`、`t30.sas`。
+- `*`: 匹配任意数量的非分隔符型字符，包括零个。例如，`f*.sas` 匹配 `f1.sas`、`f2.sas`、`f3.sas` 等等。
+- `**`: 匹配任意数量的文件或目录分段，包括零个。例如，`**/f*.sas` 匹配 `figure/f1.sas`、`figure/f2.sas`、`figure/draft/f1.sas` 等等。
+- `?`: 匹配一个不是分隔符的字符。例如，`t1?.sas` 匹配 `t1.sas`、`t10.sas`、`t11.sas` 等等。
+- `[seq]`: 匹配在 seq 中的一个字符。例如，`[tfl]1.sas` 匹配 `t1.sas`、`f1.sas`、`l1.sas`。
+
+更多语法请查看 [模式语言](https://docs.python.org/zh-cn/3/library/pathlib.html#pattern-language)。
 
 假设有这样一个文件目录结构：
 
@@ -317,7 +319,7 @@ submit copydir source dest --exclude-files "f2-deprecated.sas" "f3-deprecated.sa
 使用 `glob` 模式，命令得到简化：
 
 ```bash
-submit copydir source dest --exclude-files "*-deprecated*.sas"
+submit copydir source dest --exclude-files "*deprecated*.sas"
 ```
 
 ### 命令行选项参考
