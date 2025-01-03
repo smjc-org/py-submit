@@ -156,18 +156,23 @@ def copy_directory(
     if exclude_files:
         exclude_files = expand_glob_patterns(exclude_files, root_dir=sas_dir)
 
+    # 转换 SAS 文件
     for dirpath, _, filenames in os.walk(sas_dir):
-        if exclude_dirs is not None and os.path.split(dirpath)[-1] in exclude_dirs:
+        dirrelpath = os.path.relpath(dirpath, sas_dir)
+        if exclude_dirs is not None and dirrelpath in exclude_dirs:
             continue
-        ref_path = os.path.relpath(dirpath, sas_dir)
+        if os.path.commonpath([dirpath, sas_dir]) == txt_dir:  # 如果当前目录是目标目录或其子目录，则跳过
+            continue
         for file in filenames:
-            if exclude_files is not None and file in exclude_files:
+            filerelpath = os.path.join(dirrelpath, file)
+            if exclude_files is not None and filerelpath in exclude_files:
                 continue
             if file.endswith(".sas"):
                 sas_file = os.path.join(dirpath, file)
-                txt_file = os.path.join(txt_dir, ref_path, file.replace(".sas", ".txt"))
+                txt_file = os.path.join(txt_dir, os.path.join(txt_dir, dirrelpath), file.replace(".sas", ".txt"))
                 copy_file(sas_file, txt_file, convert_mode=convert_mode, macro_subs=macro_subs, encoding=encoding)
 
+    # 合并文件
     if merge is not None:
         merge_file = os.path.join(txt_dir, merge)
         with open(merge_file, "w", encoding=encoding) as f:
