@@ -13,17 +13,25 @@
 
 ## 安装
 
-在终端中执行以下命令：
+首先安装 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com/downloads)
+
+然后使用 `pip` 命令安装指定版本，例如：
 
 ```bash
 pip install git+https://github.com/smjc-org/py-submit.git@0.5.1
 ```
 
-该命令将会在系统中注册 `submit` 命令，以便后续使用。
+或者从特定 commit 安装：
 
-> [!IMPORTANT]
+```bash
+pip install git+https://github.com/smjc-org/py-submit.git@03c8953663c8d9f6cb71a925df4fa1da7ca34cc3
+```
+
+上述命令会将本程序安装到环境变量中指定的目录下，后续可直接通过 `submit` 命令调用。
+
+> [!NOTE]
 >
-> 你需要先安装 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com/downloads) 才能执行以上命令。
+> 对于 Windows 用户，你可以在 `%LOCALAPPDATA%/Programs/Python/Python313/Scripts` 中看到 `submit.exe`，你在终端执行 `submit` 命令实际上调用的是这个程序。
 
 ## 如何使用
 
