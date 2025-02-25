@@ -164,7 +164,10 @@ def copy_directory(
         if os.path.commonpath([dirpath, sas_dir]) == txt_dir:  # 如果当前目录是目标目录或其子目录，则跳过
             continue
         for file in filenames:
-            filerelpath = os.path.join(dirrelpath, file)
+            if dirrelpath == ".":
+                filerelpath = file
+            else:
+                filerelpath = os.path.join(dirrelpath, file)
             if exclude_files is not None and filerelpath in exclude_files:
                 continue
             if file.endswith(".sas"):
