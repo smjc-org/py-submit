@@ -11,7 +11,6 @@ requires-python = ">=3.10"
 dependencies = [
     "chardet>=5.2.0",
     "natsort>=8.4.0",
-    "pytest-cov>=6.0.0",
 ]
 authors = [{ name = "Snoopy1866", email = "1753199432@qq.com"}]
 license = {file = "LICENSE"}
@@ -41,10 +40,11 @@ submit = "submit:main"
 
 [dependency-groups]
 dev = [
-    "pre-commit>=4.0.1",
-    "pytest>=8.3.4",
-    "ruff>=0.8.3",
-    "setuptools>=75.6.0",
+    "pre-commit==4.0.1",
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "ruff==0.8.3",
+    "setuptools==75.6.0",
 ]
 
 [tool.pytest.ini_options]
