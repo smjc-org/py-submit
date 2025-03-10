@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 import argparse
-import glob
-import os
 import re
 from enum import IntFlag, auto
+from pathlib import Path
 
 from chardet import detect
 from natsort import natsorted
@@ -58,45 +57,44 @@ class ConvertMode(IntFlag):
         return modes
 
 
-def expand_glob_patterns(patterns: list[str], root_dir: str) -> list[str]:
+def expand_glob_patterns(patterns: list[Path], root_dir: Path) -> list[Path]:
     """扩展 glob 模式。
 
     Args:
-        patterns (list[str]): glob 模式列表。
-        root_dir (str): 根目录。
+        patterns (list[Path]): glob 模式列表。
+        root_dir (Path): 根目录。
 
     Returns:
-        list[str]: 文件路径列表。
+        list[Path]: 文件路径列表。
     """
-    path = []
+
+    path: list[Path] = []
     for pattern in patterns:
-        path.extend(glob.glob(pattern, root_dir=root_dir, recursive=True))
+        path.extend(root_dir.glob(pattern))
     return path
 
 
 def copy_file(
-    sas_file: str,
-    txt_file: str,
+    sas_file: Path,
+    txt_file: Path,
     convert_mode: ConvertMode = ConvertMode.BOTH,
     macro_subs: dict[str, str] | None = None,
     encoding: str | None = None,
 ) -> None:
-    """将 SAS 代码复制到 txt 文件中，并移除指定标记之间的内容。
+    """将单个 SAS 文件复制到 txt 文件，并移除指定标记之间的内容。
 
     Args:
-        sas_file (str): SAS 文件路径。
-        txt_file (str): TXT 文件路径。
+        sas_file (Path): SAS 文件路径。
+        txt_file (Path): TXT 文件路径。
         convert_mode (ConvertMode, optional): 转换模式，默认值为 ConvertMode.BOTH。
         macro_subs (dict[str, str] | None, optional): 一个字典，其键为 SAS 代码中的宏变量名称，值为替代的字符串，默认值为 None。
         encoding (str | None, optional): 字符编码，默认值为 None，将自动检测编码。
     """
 
     if encoding is None:
-        with open(sas_file, "rb") as f:
-            encoding = detect(f.read())["encoding"]
+        encoding = detect(sas_file.read_bytes())["encoding"]
 
-    with open(sas_file, "r", encoding=encoding) as f:
-        code = f.read()
+    code = sas_file.read_text(encoding=encoding)
 
     # 提取代码片段
     if convert_mode & ConvertMode.NEGATIVE:
@@ -114,41 +112,40 @@ def copy_file(
             regex_macro = re.compile(rf"(?<!&)&{key}")
             code = re.sub(regex_macro, value, code)
 
-    txt_file_dir = os.path.dirname(txt_file)
-    if not os.path.exists(txt_file_dir):
-        os.makedirs(txt_file_dir)
-    with open(txt_file, "w", encoding=encoding) as f:
-        f.write(code)
+    txt_file_dir = txt_file.parent
+    if not txt_file_dir.exists():
+        txt_file_dir.mkdir(parents=True)
+    txt_file.write_text(code, encoding=encoding)
 
 
 def copy_directory(
-    sas_dir: str,
-    txt_dir: str,
+    sas_dir: Path,
+    txt_dir: Path,
     merge: str | None = None,
     convert_mode: ConvertMode = ConvertMode.BOTH,
     macro_subs: dict[str, str] | None = None,
-    exclude_files: list[str] = None,
-    exclude_dirs: list[str] = None,
+    exclude_files: list[Path] = None,
+    exclude_dirs: list[Path] = None,
     encoding: str | None = None,
 ) -> None:
-    """将 SAS 代码复制到 txt 文件中，并移除指定标记之间的内容。
+    """将目录中的所有 SAS 文件复制到 txt 文件，并移除指定标记之间的内容。
 
     Args:
-        sas_dir (str): SAS 文件夹路径。
-        txt_dir (str): TXT 文件夹路径。
+        sas_dir (Path): SAS 文件夹路径。
+        txt_dir (Path): TXT 文件夹路径。
         merge (str | None, optional): 合并到一个文件，默认值为 None。
         convert_mode (ConvertMode, optional): 转换模式，默认值为 ConvertMode.BOTH。
         macro_subs (dict[str, str] | None, optional): 一个字典，其键为 SAS 代码中的宏变量名称，值为替代的字符串，默认值为 None。
-        exclude_files (list[str], optional): 排除文件列表，默认值为 None。
-        exclude_dirs (list[str], optional): 排除目录列表，默认值为 None。
+        exclude_files (list[Path], optional): 排除文件列表，默认值为 None。
+        exclude_dirs (list[Path], optional): 排除目录列表，默认值为 None。
         encoding (str | None, optional): 字符编码，默认值为 None，将自动检测编码。
     """
 
-    if not os.path.exists(sas_dir):
+    if not sas_dir.exists():
         print(f"源文件夹 {sas_dir} 不存在。")
         return
-    if not os.path.exists(txt_dir):
-        os.makedirs(txt_dir)
+    if not txt_dir.exists():
+        txt_dir.mkdir(parents=True)
 
     if exclude_dirs:
         exclude_dirs = expand_glob_patterns(exclude_dirs, root_dir=sas_dir)
@@ -157,44 +154,44 @@ def copy_directory(
         exclude_files = expand_glob_patterns(exclude_files, root_dir=sas_dir)
 
     # 转换 SAS 文件
-    for dirpath, _, filenames in os.walk(sas_dir):
-        dirrelpath = os.path.relpath(dirpath, sas_dir)
+    for dirpath, _, filenames in sas_dir.walk():
+        dirrelpath = dirpath.relative_to(sas_dir)
         if exclude_dirs is not None and dirrelpath in exclude_dirs:
             continue
-        if os.path.commonpath([dirpath, sas_dir]) == txt_dir:  # 如果当前目录是目标目录或其子目录，则跳过
+        if txt_dir in dirpath.parents:  # 如果当前目录是目标目录或其子目录，则跳过
             continue
         for file in filenames:
             if dirrelpath == ".":
                 filerelpath = file
             else:
-                filerelpath = os.path.join(dirrelpath, file)
+                filerelpath = dirrelpath / file
             if exclude_files is not None and filerelpath in exclude_files:
                 continue
             if file.endswith(".sas"):
-                sas_file = os.path.join(dirpath, file)
-                txt_file = os.path.join(txt_dir, os.path.join(txt_dir, dirrelpath), file.replace(".sas", ".txt"))
+                sas_file = dirpath / file
+                txt_file = txt_dir / dirrelpath / file.replace(".sas", ".txt")
                 copy_file(sas_file, txt_file, convert_mode=convert_mode, macro_subs=macro_subs, encoding=encoding)
 
     # 合并文件
     if merge is not None:
-        merge_file = os.path.join(txt_dir, merge)
+        merge_file = txt_dir / merge
         with open(merge_file, "w", encoding=encoding) as f:
-            for dirpath, _, filenames in os.walk(txt_dir):
+            for dirpath, _, filenames in txt_dir.walk():
                 filenames = natsorted(filenames)
                 for file in filenames:
                     if file.endswith(".txt") and file != merge:
-                        txt_file = os.path.join(dirpath, file)
+                        txt_file = dirpath / file
                         with open(txt_file, "r", encoding=encoding) as txt:
                             f.write(f"/*======{file}======*/\n")
                             f.write(txt.read())
                             f.write("\n")
 
-        for dirpath, _, filenames in os.walk(txt_dir):
+        for dirpath, _, filenames in txt_dir.walk():
             filenames = natsorted(filenames)
             for file in filenames:
                 if file.endswith(".txt") and file != merge:
-                    txt_file = os.path.join(dirpath, file)
-                    os.remove(txt_file)
+                    txt_file = dirpath / file
+                    txt_file.unlink()
 
 
 def parse_dict(arg: str) -> dict[str, str]:
