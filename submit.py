@@ -211,7 +211,7 @@ def parse_dict(arg: str) -> dict[str, str]:
         raise argparse.ArgumentTypeError("无效的字典字符串")
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover
     parser = argparse.ArgumentParser(
         prog="submit",
         usage="%(prog)s [options]",
