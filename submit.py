@@ -206,12 +206,12 @@ def parse_dict(arg: str) -> dict[str, str]:
 
     arg = arg.strip("{}")
     try:
-        return dict([ele.strip("\"'") for ele in item.split("=")] for item in arg.split(","))
+        return dict([ele.strip("\"'") for ele in item.split("=")] for item in arg.split(", "))
     except ValueError:
         raise argparse.ArgumentTypeError("无效的字典字符串")
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover
     parser = argparse.ArgumentParser(
         prog="submit",
         usage="%(prog)s [options]",
@@ -275,5 +275,5 @@ def main() -> None:
         parser.print_help()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    main()  # pragma: no cover
