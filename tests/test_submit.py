@@ -1,10 +1,24 @@
+import argparse
 import re
 from pathlib import Path
 
-from submit import ConvertMode, copy_file, copy_directory
+import pytest
+
+from submit import ConvertMode, copy_file, copy_directory, parse_dict
 
 
 class TestSubmit:
+    def test_convert_mode(self):
+        assert str(ConvertMode.POSITIVE) == "positive"
+        assert str(ConvertMode.NEGATIVE) == "negative"
+        assert str(ConvertMode.BOTH) == "both"
+
+        assert ConvertMode.get_from_str("positive") == ConvertMode.POSITIVE
+        assert ConvertMode.get_from_str("negative") == ConvertMode.NEGATIVE
+        assert ConvertMode.get_from_str("both") == ConvertMode.BOTH
+
+        assert ConvertMode.get_available_values() == [ConvertMode.POSITIVE, ConvertMode.NEGATIVE, ConvertMode.BOTH]
+
     def test_copy_file(self, shared_source_directory: Path, shared_validate_directory: Path, tmp_path: Path):
         test_adsl = shared_source_directory / "adam" / "adsl.sas"
         validate_adsl = shared_validate_directory / "adam" / "adsl.txt"
@@ -30,3 +44,9 @@ class TestSubmit:
             tmp_code = (tmp_path / validate_file.relative_to(shared_validate_directory)).read_text()
 
             assert re.sub(r"\s*", "", tmp_code) == re.sub(r"\s*", "", validate_code)
+
+    def test_parse_dict(self):
+        assert parse_dict("{a=1}") == {"a": "1"}
+        assert parse_dict("{a=1, b=2}") == {"a": "1", "b": "2"}
+        with pytest.raises(argparse.ArgumentTypeError):
+            parse_dict("{a=1{,} b=2}")
