@@ -21,9 +21,9 @@ class TestSubmit:
 
         assert ConvertMode.get_available_values() == [ConvertMode.POSITIVE, ConvertMode.NEGATIVE, ConvertMode.BOTH]
 
-    def test_copy_file(self, shared_source_directory: Path, shared_validate_directory: Path, tmp_path: Path):
-        test_adsl = shared_source_directory / "adam" / "adsl.sas"
-        validate_adsl = shared_validate_directory / "adam" / "adsl.txt"
+    def test_copy_file(self, source_directory: Path, validate_directory: Path, tmp_path: Path):
+        test_adsl = source_directory / "adam" / "adsl.sas"
+        validate_adsl = validate_directory / "adam" / "adsl.txt"
 
         tmp_adsl = tmp_path / "adam" / "adsl.txt"
         copy_file(test_adsl, tmp_adsl)
@@ -35,15 +35,15 @@ class TestSubmit:
 
         assert re.sub(r"\s*", "", tmp_code) == re.sub(r"\s*", "", validate_code)
 
-    def test_copy_directory(self, shared_source_directory: Path, shared_validate_directory: Path, tmp_path: Path):
+    def test_copy_directory(self, source_directory: Path, validate_directory: Path, tmp_path: Path):
         copy_directory(
-            shared_source_directory, tmp_path, exclude_dirs=["other"], exclude_files=["fcmp.sas"], macro_subs={"id": ""}
+            source_directory, tmp_path, exclude_dirs=["other"], exclude_files=["fcmp.sas"], macro_subs={"id": ""}
         )
-        copy_directory(shared_source_directory / "macro", tmp_path / "macro", convert_mode=ConvertMode.NEGATIVE)
+        copy_directory(source_directory / "macro", tmp_path / "macro", convert_mode=ConvertMode.NEGATIVE)
 
-        for validate_file in shared_validate_directory.rglob("*.txt"):
+        for validate_file in validate_directory.rglob("*.txt"):
             validate_code = validate_file.read_text()
-            tmp_code = (tmp_path / validate_file.relative_to(shared_validate_directory)).read_text()
+            tmp_code = (tmp_path / validate_file.relative_to(validate_directory)).read_text()
 
             assert re.sub(r"\s*", "", tmp_code) == re.sub(r"\s*", "", validate_code)
 

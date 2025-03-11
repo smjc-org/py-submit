@@ -28,7 +28,7 @@ from tests.contents_validate import (
 
 
 @pytest.fixture(scope="session")
-def shared_source_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def source_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
     dir = tmp_path_factory.mktemp("code")
     dir_adam = dir / "adam"
     dir_tfl = dir / "tfl"
@@ -65,7 +65,7 @@ def shared_source_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 
 @pytest.fixture(scope="session")
-def shared_validate_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def validate_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
     dir = tmp_path_factory.mktemp("validate")
     dir_adam = dir / "adam"
     dir_tfl = dir / "tfl"
