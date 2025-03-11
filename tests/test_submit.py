@@ -16,6 +16,8 @@ class TestSubmit:
         assert ConvertMode.get_from_str("positive") == ConvertMode.POSITIVE
         assert ConvertMode.get_from_str("negative") == ConvertMode.NEGATIVE
         assert ConvertMode.get_from_str("both") == ConvertMode.BOTH
+        with pytest.raises(argparse.ArgumentTypeError):
+            ConvertMode.get_from_str("invalid")
 
         assert ConvertMode.get_available_values() == [ConvertMode.POSITIVE, ConvertMode.NEGATIVE, ConvertMode.BOTH]
 
