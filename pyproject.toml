@@ -40,7 +40,7 @@ submit = "submit:main"
 
 [dependency-groups]
 dev = [
-    "pre-commit==4.1.0",
+    "pre-commit==4.2.0",
     "pytest==8.3.5",
     "pytest-cov==6.0.0",
     "ruff==0.9.10",
