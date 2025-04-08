@@ -250,7 +250,7 @@ def main() -> None:  # pragma: no cover
     parser_dir.add_argument("-exf", "--exclude-files", nargs="*", default=None, help="排除文件列表（默认无）")
     parser_dir.add_argument("-exd", "--exclude-dirs", nargs="*", default=None, help="排除目录列表（默认无）")
 
-    args = parser.parse_args(["copydir", "./05 TFL程序/01 主程序", "./11 数据递交文件/03 程序代码/02 TFL"])
+    args = parser.parse_args()
 
     if args.command == "copyfile":
         copy_file(
