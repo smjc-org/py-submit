@@ -142,7 +142,7 @@ def copy_directory(
     """
 
     if not sas_dir.exists():
-        print(f"源文件夹 {sas_dir} 不存在。")
+        print(f'源文件夹 "{sas_dir.absolute()}" 不存在。')
         return
     if not txt_dir.exists():
         txt_dir.mkdir(parents=True)
@@ -250,20 +250,20 @@ def main() -> None:  # pragma: no cover
     parser_dir.add_argument("-exf", "--exclude-files", nargs="*", default=None, help="排除文件列表（默认无）")
     parser_dir.add_argument("-exd", "--exclude-dirs", nargs="*", default=None, help="排除目录列表（默认无）")
 
-    args = parser.parse_args()
+    args = parser.parse_args(["copydir", "./05 TFL程序/01 主程序", "./11 数据递交文件/03 程序代码/02 TFL"])
 
     if args.command == "copyfile":
         copy_file(
-            sas_file=args.sas_file,
-            txt_file=args.txt_file,
+            sas_file=Path(args.sas_file),
+            txt_file=Path(args.txt_file),
             convert_mode=args.convert_mode,
             macro_subs=args.macro_subs,
             encoding=args.encoding,
         )
     elif args.command == "copydir":
         copy_directory(
-            sas_dir=args.sas_dir,
-            txt_dir=args.txt_dir,
+            sas_dir=Path(args.sas_dir),
+            txt_dir=Path(args.txt_dir),
             merge=args.merge,
             convert_mode=args.convert_mode,
             macro_subs=args.macro_subs,
