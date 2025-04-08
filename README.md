@@ -19,7 +19,7 @@
 然后使用 `pip` 命令安装指定版本，例如：
 
 ```bash
-pip install git+https://github.com/smjc-org/py-submit.git@0.5.2
+pip install git+https://github.com/smjc-org/py-submit.git@0.5.3
 ```
 
 或者从特定 commit 安装：
