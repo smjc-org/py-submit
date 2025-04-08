@@ -142,7 +142,7 @@ def copy_directory(
     """
 
     if not sas_dir.exists():
-        print(f"源文件夹 {sas_dir} 不存在。")
+        print(f'源文件夹 "{sas_dir.absolute()}" 不存在。')
         return
     if not txt_dir.exists():
         txt_dir.mkdir(parents=True)
@@ -254,16 +254,16 @@ def main() -> None:  # pragma: no cover
 
     if args.command == "copyfile":
         copy_file(
-            sas_file=args.sas_file,
-            txt_file=args.txt_file,
+            sas_file=Path(args.sas_file),
+            txt_file=Path(args.txt_file),
             convert_mode=args.convert_mode,
             macro_subs=args.macro_subs,
             encoding=args.encoding,
         )
     elif args.command == "copydir":
         copy_directory(
-            sas_dir=args.sas_dir,
-            txt_dir=args.txt_dir,
+            sas_dir=Path(args.sas_dir),
+            txt_dir=Path(args.txt_dir),
             merge=args.merge,
             convert_mode=args.convert_mode,
             macro_subs=args.macro_subs,
