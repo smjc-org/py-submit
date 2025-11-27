@@ -155,12 +155,12 @@ def copy_directory(
 
     # 转换 SAS 文件
     for dirpath, _, filenames in sas_dir.walk():
-        dirrelpath = dirpath.relative_to(sas_dir)
-        if exclude_dirs is not None and dirrelpath in exclude_dirs:
+        if exclude_dirs is not None and dirpath in exclude_dirs:
             continue
         if txt_dir in dirpath.parents:  # 如果当前目录是目标目录或其子目录，则跳过
             continue
         for file in filenames:
+            dirrelpath = dirpath.relative_to(sas_dir)
             if dirrelpath == ".":
                 filerelpath = file
             else:
@@ -211,7 +211,7 @@ def parse_dict(arg: str) -> dict[str, str]:
         raise argparse.ArgumentTypeError("无效的字典字符串")
 
 
-def main() -> None:  # pragma: no cover
+def main(argv: list[str] | None = None) -> None:  # pragma: no cover
     parser = argparse.ArgumentParser(
         prog="submit",
         usage="%(prog)s [options]",
@@ -250,7 +250,7 @@ def main() -> None:  # pragma: no cover
     parser_dir.add_argument("-exf", "--exclude-files", nargs="*", default=None, help="排除文件列表（默认无）")
     parser_dir.add_argument("-exd", "--exclude-dirs", nargs="*", default=None, help="排除目录列表（默认无）")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.command == "copyfile":
         copy_file(
