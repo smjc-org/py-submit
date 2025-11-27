@@ -8,7 +8,7 @@ ci:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -23,18 +23,18 @@ repos:
       - id: forbid-submodules
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 40.3.4
+    rev: 42.19.6
     hooks:
       - id: renovate-config-validator
         files: renovate.json
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.7.2
+    rev: 0.9.11
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.14.6
     hooks:
       - id: ruff
         types_or: [python, pyi]
@@ -43,6 +43,6 @@ repos:
         types_or: [python, pyi]
 
   - repo: https://github.com/opensource-nepal/commitlint
-    rev: v1.3.0
+    rev: v1.3.1
     hooks:
       - id: commitlint
