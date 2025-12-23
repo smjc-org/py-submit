@@ -161,11 +161,8 @@ def copy_directory(
             continue
         for file in filenames:
             dirrelpath = dirpath.relative_to(sas_dir)
-            if dirrelpath == ".":
-                filerelpath = file
-            else:
-                filerelpath = dirrelpath / file
-            if exclude_files is not None and filerelpath in exclude_files:
+            fileabspath = dirpath / file
+            if exclude_files is not None and fileabspath in exclude_files:
                 continue
             if file.endswith(".sas"):
                 sas_file = dirpath / file
