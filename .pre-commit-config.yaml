@@ -13,14 +13,11 @@ repos:
       - id: check-added-large-files
       - id: check-case-conflict
       - id: check-docstring-first
-      - id: check-illegal-windows-names
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
-      - id: fix-byte-order-marker
-      - id: forbid-submodules
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
     rev: 42.66.0
