@@ -40,10 +40,12 @@ pip install git+https://github.com/smjc-org/py-submit.git@00c745e2c6a26b9d8b5665
 
 `submit` 命令可以识别的特殊注释如下：
 
-- `/*`_`symbols`_`SUBMIT BEGIN`_`symbols`_`*/`: 指定**需要**提交的代码的**起始**位置
-- `/*`_`symbols`_`SUBMIT END`_`symbols`_`*/`: 指定**需要**提交的代码的**终止**位置
-- `/*`_`symbols`_`NOT SUBMIT BEGIN`_`symbols`_`*/`: 指定**无需**提交的代码的**起始**位置
-- `/*`_`symbols`_`NOT SUBMIT END`_`symbols`_`*/`: 指定**无需**提交的代码的**终止**位置
+| 注释                                           | 含义                                 |
+| ---------------------------------------------- | ------------------------------------ |
+| /\* _symbols_ `SUBMIT BEGIN` _symbols_ \*/     | **需要**提交的代码片段的**开始**位置 |
+| /\* _symbols_ `SUBMIT END` _symbols_ \*/       | **需要**提交的代码片段的**结束**位置 |
+| /\* _symbols_ `NOT SUBMIT BEGIN` _symbols_ \*/ | **无需**提交的代码片段的**开始**位置 |
+| /\* _symbols_ `NOT SUBMIT BEGIN` _symbols_ \*/ | **无需**提交的代码片段的**结束**位置 |
 
 > [!NOTE]
 >
@@ -102,7 +104,7 @@ submit cpf "adae.sas" "adae.txt"
 > [!TIP]
 >
 > - `cpf` 是 `copyfile` 的别名（_alias_），大多数选项都具有别名，可通过 `--help` 命令查看。
-> - 可以使用相对路径和绝对路径，使用相对路径时，以 `submit` 命令执行所在目录为根。
+> - 可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 >   例如：在 `/code` 目录下处理子目录 `/code/adam` 中的 `adae.sas` 文件，应该执行 `submit copyfile "adam/adae.sas" "submit/adae.txt"`，此时 `adae.txt` 文件将保存在 `/code/submit` 目录下。
 
 #### --convert-mode
@@ -220,6 +222,8 @@ submit copyfile --convert-mode negative --encoding gbk
 ```bash
 submit copydir "/source" "/dest"
 ```
+
+其中，`/source` 是需要处理的 `.sas` 文件所在目录，`/dest` 是处理后保存的 `.txt` 文件所在目录。
 
 #### --convert-mode
 
