@@ -83,6 +83,21 @@ proc report;
 quit;
 """
 
+content_source_t4 = """
+proc datasets library = work memtype = data kill noprint;
+quit;
+
+%let id = %str();
+
+/*====SUBMIT BEGIN====*/
+proc sql;
+    create table t4 as select * from adam.adeff&id;
+quit;
+
+proc report;
+quit;
+"""
+
 content_source_macro1 = """
 %macro macro1;
     proc sql;
@@ -98,6 +113,18 @@ content_source_macro2 = """
     quit;
 
     /*====NOT SUBMIT BEGIN====*/
+    proc report;
+    quit;
+    /*NOT SUBMIT END*/
+%mend macro2;
+"""
+
+content_source_macro3 = """
+%macro macro2;
+    proc sql;
+        select * from adae;
+    quit;
+
     proc report;
     quit;
     /*NOT SUBMIT END*/
