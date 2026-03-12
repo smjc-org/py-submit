@@ -8,8 +8,10 @@ from tests.contents_source import (
     content_source_t1,
     content_source_t2,
     content_source_t3,
+    content_source_t4,
     content_source_macro1,
     content_source_macro2,
+    content_source_macro3,
     content_source_q1,
     content_source_q2,
     content_source_fcmp,
@@ -45,11 +47,13 @@ def source_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
     (dir_tfl / "t1.sas").write_text(content_source_t1)
     (dir_tfl / "t2.sas").write_text(content_source_t2)
     (dir_tfl / "t3.sas").write_text(content_source_t3)
+    (dir_tfl / "t4.sas").write_text(content_source_t4)
 
     # macro sas files
     dir_macro.mkdir()
     (dir_macro / "macro1.sas").write_text(content_source_macro1)
     (dir_macro / "macro2.sas").write_text(content_source_macro2)
+    (dir_macro / "macro3.sas").write_text(content_source_macro3)
 
     # other directories which supposed to be excluded
     dir_other.mkdir()

@@ -96,15 +96,30 @@ def copy_file(
 
     code = sas_file.read_text(encoding=encoding)
 
-    # 提取代码片段
-    if convert_mode & ConvertMode.NEGATIVE:
-        # 移除不需要递交的代码片段
-        code = re.sub(rf"{COMMENT_NOT_SUBMIT_NEGIN}.*?{COMMENT_NOT_SUBMIT_END}", "", code, flags=re.I | re.S)
+    # 处理特殊注释，NEGATIVE 模式优先级高于 POSITIVE 模式
 
+    # NEGATIVE 模式，移除不需要递交的代码片段
+    if convert_mode & ConvertMode.NEGATIVE:
+        start_match = re.search(rf"{COMMENT_NOT_SUBMIT_NEGIN}", code, flags=re.I | re.S)
+        end_match = re.search(rf"{COMMENT_NOT_SUBMIT_END}", code, flags=re.I | re.S)
+        if start_match and end_match:
+            code = re.sub(rf"{COMMENT_NOT_SUBMIT_NEGIN}.*?{COMMENT_NOT_SUBMIT_END}", "", code, flags=re.I | re.S)
+        elif (start_match is None) != (end_match is None):
+            print(f"源文件 {sas_file.name} 中出现了不匹配的特殊注释，模式：NEGATIVE。")
+        else:
+            pass
+
+    # POSITIVE 模式，仅提取需要递交的代码片段
     if convert_mode & ConvertMode.POSITIVE:
-        # 提取需要递交的代码片段
-        code = re.findall(rf"{COMMENT_SUBMIT_BEGIN}(.*?){COMMENT_SUBMIT_END}", code, re.I | re.S)
-        code = "".join(code)
+        start_match = re.search(rf"{COMMENT_SUBMIT_BEGIN}", code, flags=re.I | re.S)
+        end_match = re.search(rf"{COMMENT_SUBMIT_END}", code, flags=re.I | re.S)
+        if start_match and end_match:
+            code = re.findall(rf"{COMMENT_SUBMIT_BEGIN}(.*?){COMMENT_SUBMIT_END}", code, re.I | re.S)
+            code = "".join(code)
+        elif (start_match is None) != (end_match is None):
+            print(f"源文件 {sas_file.name} 中出现了不匹配的特殊注释，模式：POSITIVE。")
+        else:
+            pass
 
     # 替换宏变量
     if macro_subs is not None:
