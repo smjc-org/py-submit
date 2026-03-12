@@ -4,28 +4,25 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "submit"
-version = "0.5.5"
+version = "0.5.6"
 description = "Extract code block which should be submitted to regulatory agency."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "chardet>=5.2.0",
-    "natsort>=8.4.0",
-]
-authors = [{ name = "Snoopy1866"}]
-license = {file = "LICENSE"}
+dependencies = ["chardet>=5.2.0", "natsort>=8.4.0"]
+authors = [{ name = "Snoopy1866" }]
+license = { file = "LICENSE" }
 keywords = ["sas", "nmpa", "regulatory", "guidelines", "submit"]
 classifiers = [
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "Topic :: Software Development",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.urls]
