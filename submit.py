@@ -171,6 +171,7 @@ def copy_directory(
     # 转换 SAS 文件
     for dirpath, _, filenames in sas_dir.walk():
         if exclude_dirs is not None and dirpath in exclude_dirs:
+            print(f"已排除 {dirpath.absolute()}")
             continue
         if txt_dir in dirpath.parents:  # 如果当前目录是目标目录或其子目录，则跳过
             continue
@@ -178,8 +179,10 @@ def copy_directory(
             dirrelpath = dirpath.relative_to(sas_dir)
             fileabspath = dirpath / file
             if exclude_files is not None and fileabspath in exclude_files:
+                print(f"已排除 {fileabspath.absolute()}")
                 continue
             if file.endswith(".sas"):
+                print(f"已转换 {fileabspath.absolute()}")
                 sas_file = dirpath / file
                 txt_file = txt_dir / dirrelpath / file.replace(".sas", ".txt")
                 copy_file(sas_file, txt_file, convert_mode=convert_mode, macro_subs=macro_subs, encoding=encoding)
