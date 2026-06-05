@@ -10,11 +10,11 @@
 [![codecov](https://codecov.io/gh/smjc-org/py-submit/graph/badge.svg?token=MNWAUJ35HT)](https://codecov.io/gh/smjc-org/py-submit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/smjc-org/py-submit/main.svg)](https://results.pre-commit.ci/latest/github/smjc-org/py-submit/main)
 
-本程序用于从 `.sas` 文件中提取需要递交至监管机构的代码，并另存为 `.txt` 格式的文件。
+本程序用于从 `.sas` 文件中裁剪需要递交的代码，并以 `.txt` 格式存储，可处理单个文件，也可以处理指定目录下的所有文件。
 
 ## 安装
 
-首先安装 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com/downloads)
+首先安装 [Python](https://www.python.org/downloads/) 和 [Git](https://git-scm.com)
 
 然后使用 `pip` 命令安装指定版本，例如：
 
@@ -28,13 +28,18 @@ pip install git+https://github.com/smjc-org/py-submit.git@0.5.6
 pip install git+https://github.com/smjc-org/py-submit.git@5ed1b3d545c5670f110fe32139860e8e5a9f446b
 ```
 
-上述命令会将本程序安装到环境变量中指定的目录下，后续可直接通过 `submit` 命令调用。
+上述命令会将本程序安装到环境变量中指定的目录下，并向系统注册 `submit` 命令以供后续调用。
 
 > [!NOTE]
 >
 > 对于 Windows 用户，你可以在 `%LOCALAPPDATA%/Programs/Python/Python313/Scripts` 中看到 `submit.exe`，你在终端执行 `submit` 命令实际上调用的是这个程序。
 
-## 工作原理
+## 使用方法
+
+`submit` 包含两个子命令：
+
+- `copyfile`: 处理单个 sas 文件，保存处理后的代码到 txt 文件中
+- `copydir`: 处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中
 
 `submit` 命令会识别 `.sas` 文件中的特殊注释，根据这些注释裁剪代码片段，以满足递交需求。
 
@@ -55,7 +60,7 @@ pip install git+https://github.com/smjc-org/py-submit.git@5ed1b3d545c5670f110fe3
 > - _`symbols`_ 可以是符号 `*`, `-`, `=`, ` `(空格) 的任意组合
 > - 注释不区分大小写
 
-举例：
+举例，假设文件 `code.sas` 的内容如下：
 
 ```sas
 proc datasets library = work memtype = data kill noprint;
@@ -83,7 +88,13 @@ run;
 %error;
 ```
 
-上述代码经 `submit` 命令处理后的结果如下：
+使用以下命令处理 `code.sas` 文件：
+
+```bash
+submit copyfile -s code.sas -t code.txt
+```
+
+处理后的代码保存在 `code.txt` 中：
 
 ```sas
 proc sql noprint;
@@ -95,12 +106,7 @@ proc means data = adsl;
 run;
 ```
 
-## 使用方法
-
-`submit` 包含两个子命令：
-
-- `copyfile`: 处理单个 sas 文件，保存处理后的代码到 txt 文件中
-- `copydir`: 处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中
+## 选项参考
 
 ### 子命令 `copyfile`
 
