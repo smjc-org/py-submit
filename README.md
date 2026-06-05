@@ -34,18 +34,21 @@ pip install git+https://github.com/smjc-org/py-submit.git@5ed1b3d545c5670f110fe3
 >
 > 对于 Windows 用户，你可以在 `%LOCALAPPDATA%/Programs/Python/Python313/Scripts` 中看到 `submit.exe`，你在终端执行 `submit` 命令实际上调用的是这个程序。
 
-## 如何使用
+## 工作原理
 
-`submit` 命令会识别 `.sas` 文件中的特殊注释，根据这些注释，删除多余的代码片段，保留需要递交的代码片段。
+`submit` 命令会识别 `.sas` 文件中的特殊注释，根据这些注释裁剪代码片段，以满足递交需求。
 
-`submit` 命令可以识别的特殊注释如下：
+可识别的注释分为两类：_positive_ 模式和 _negative_ 模式。
 
-| 注释                                           | 含义                                 |
-| ---------------------------------------------- | ------------------------------------ |
-| /\* _symbols_ `SUBMIT BEGIN` _symbols_ \*/     | **需要**提交的代码片段的**开始**位置 |
-| /\* _symbols_ `SUBMIT END` _symbols_ \*/       | **需要**提交的代码片段的**结束**位置 |
-| /\* _symbols_ `NOT SUBMIT BEGIN` _symbols_ \*/ | **无需**提交的代码片段的**开始**位置 |
-| /\* _symbols_ `NOT SUBMIT BEGIN` _symbols_ \*/ | **无需**提交的代码片段的**结束**位置 |
+***positive*** 模式的注释格式为：
+
+- /* _symbols_ `SUBMIT BEGIN` _symbols_ */
+- /* _symbols_ `SUBMIT END` _symbols_ */
+
+***negative*** 模式的注释格式为：
+
+- /* _symbols_ `NOT SUBMIT BEGIN` _symbols_ */
+- /* _symbols_ `NOT SUBMIT END` _symbols_ */
 
 > [!NOTE]
 >
@@ -55,10 +58,6 @@ pip install git+https://github.com/smjc-org/py-submit.git@5ed1b3d545c5670f110fe3
 举例：
 
 ```sas
-/*
-Top-Level Comment
-*/
-
 proc datasets library = work memtype = data kill noprint;
 quit;
 
@@ -69,219 +68,173 @@ proc sql noprint;
     create table work.adsl as select * from rawdata.adsl;
 quit;
 
+/*NOT SUBMIT BEGIN*/
 proc sql noprint;
     create table work.t_6_1_1 as select * from adsl;
 quit;
+/*NOT SUBMIT END*/
+
+proc means data = adsl;
+run;
+
 /*SUBMIT END*/
 
-%LOG;
-%ERROR;
+%log;
+%error;
 ```
 
-经 `submit` 命令处理之后将会变成：
+上述代码经 `submit` 命令处理后的结果如下：
 
 ```sas
 proc sql noprint;
     create table work.adsl as select * from rawdata.adsl;
 quit;
 
-proc sql noprint;
-    create table work.t_6_1_1 as select * from adsl;
-quit;
-```
 
-### 处理单个 SAS 文件
-
-子命令 `copyfile` 用于处理单个 `.sas` 文件。
-
-```bash
-submit copyfile "adae.sas" "adae.txt"
-```
-
-其中，`adae.sas` 是需要处理的 `.sas` 文件路径，`adae.txt` 是处理后保存的 `.txt` 文件路径。
-
-> [!TIP]
->
-> - `cpf` 是 `copyfile` 的别名（_alias_），大多数选项都具有别名，可通过 `--help` 命令查看。
-> - 可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
->   例如：在 `/code` 目录下处理子目录 `/code/adam` 中的 `adae.sas` 文件，应该执行 `submit copyfile "adam/adae.sas" "submit/adae.txt"`，此时 `adae.txt` 文件将保存在 `/code/submit` 目录下。
-
-#### --convert-mode
-
-`--convert-mode` 选项用于指定处理模式，可选值为：`positive`, `negative`, `both`，默认为 `both`。
-
-- `positive`: 仅处理 `/* SUBMIT BEGIN */`, `/* SUBMIT END */`
-- `negative`: 仅处理 `/* NOT SUBMIT BEGIN*/`, `/* NOT SUBMIT END */`
-- `both`: 同时处理所有四个特殊注释
-
-> [!IMPORTANT]
->
-> `/* NOT SUBMIT BEGIN*/`, `/* NOT SUBMIT END */` 的处理优先级高于 `/* SUBMIT BEGIN */`, `/* SUBMIT END */`。
-
-```bash
-submit copyfile --convert-mode negative
-```
-
-上述命令将会把：
-
-```sas
-%macro BAplot(indata, var, outdata);
-    data _tmp1;
-        set &indata;
-    run;
-
-    proc sql noprint;
-        create table _tmp2 as select * from _tmp1;
-    quit;
-
-    data &outdata;
-        set _tmp2;
-    run;
-
-    /*NOT SUBMIT BEGIN*/
-    proc template;
-        define statgraph BAplot;
-            begingraph;
-                entrytitle "BA Plot";
-                layout overlay;
-                    scatterplot x=Period y=BA / group=Subject;
-                endlayout;
-            endgraph;
-        end;
-    run;
-
-    proc sgrender data=&outdata template=BAplot;
-    run;
-    /*NOT SUBMIT END*/
-%mend BAplot;
-```
-
-处理为：
-
-```sas
-%macro BAplot(indata, var, outdata);
-    data _tmp1;
-        set &indata;
-    run;
-
-    proc sql noprint;
-        create table _tmp2 as select * from _tmp1;
-    quit;
-
-    data &outdata;
-        set _tmp2;
-    run;
-
-
-%mend BAplot;
-```
-
-#### --macro-subs
-
-`--macro-subs` 选项用于替换 `.sas` 文件中宏变量，它应当是一个字典，形式为 `{key=value,...}`，其键 `key` 为宏变量名称，值 `value` 为替换字符串。
-
-例如，如果想将下面的代码块中的宏变量 `&id` 替换为 `01`：
-
-```sas
-/*submit begin*/
-data adeff;
-    set adeff.adeff&id;
+proc means data = adsl;
 run;
-/*submit end*/
 ```
 
-你需要指定 `--macro-subs "{id=01}"`。
+## 使用方法
 
-> [!TIP]
->
-> `value` 可以为空，例如 `--macro-subs "{id=}"`，此时程序将会删除宏变量 `&id`。
+`submit` 包含两个子命令：
 
-> [!WARNING]
->
-> `--macro-subs` 不支持嵌套的宏变量，例如：`&&id`，`&&&id` 等。
+- `copyfile`: 处理单个 sas 文件，保存处理后的代码到 txt 文件中
+- `copydir`: 处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中
 
-#### --encoding
+### 子命令 `copyfile`
 
-`--encoding` 选项指定 `.sas` 文件的编码格式。若未指定该选项，将尝试猜测最有可能的编码格式，并用于后续处理。
+子命令 `copyfile` 用于处理单个 `.sas` 文件，可用的选项如下：
+
+#### `-s, -sas-file`
+
+指定需裁剪的 `.sas` 文件路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+
+#### `-t, -txt-file`
+
+指定处理后的代码保存的 `.txt` 文件路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+
+#### `--positive`
+
+指定处理 _positive_ 模式的注释。
+
+#### `--no-positive`
+
+指定不要处理 _positive_ 模式的注释。
+
+#### `--negative`
+
+指定处理 _negative_ 模式的注释，优先级高于 `--positive`。
+
+#### `--no-negative`
+
+指定不要处理 _negative_ 模式的注释。
+
+#### `-e, --encoding`
+
+指定 `.sas` 文件的字符编码，默认值为 `gbk`。
+
+#### `--help`
+
+显示帮助信息并退出。
+
+#### 示例
 
 ```bash
-submit copyfile --convert-mode negative --encoding gbk
+submit copyfile -s "./adae.sas" "./output/adae.txt"
+submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative
+submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --encoding utf-8
 ```
 
-> [!NOTE]
->
-> 本程序使用 [chardet](https://github.com/chardet/chardet) 进行编码格式的自动识别，但 `chardet` 会将 `gbk` 编码的文件错误地识别为 `gb2312` 编码。https://github.com/chardet/chardet/issues/168
->
-> 如果出现类似 `UnicodeDecodeError:'gb2312'codec can't decode byte xfb in position 6436: illegal multibyte sequence` 的错误提示，请尝试手动指定 `--encoding gbk`。
+### 子命令 `copydir`
 
-### 处理多个 SAS 文件
+```bash
+Usage: submit copydir [OPTIONS]
+
+  处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
+
+Options:
+  -s, --sas-dir DIRECTORY     包含需裁剪的 sas 代码的目录路径  [required]
+  -t, --txt-dir PATH          裁剪后的 sas 代码保存的目录路径  [required]
+  --positive / --no-positive  是否处理 positive 模式的注释
+  --negative / --no-negative  是否处理 negative 模式的注释，优先级高于 --positive
+  -e, --encoding TEXT         字符编码，默认值为 gbk
+  --merge / --no-merge        是否将所有处理后的代码合并到一个文件中
+  --merge-name TEXT           合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效
+  -exd, --exclude-dir TEXT    排除的目录路径模式
+  -exf, --exclude-file TEXT   排除的文件路径模式
+  --help                      Show this message and exit.
+```
 
 子命令 `copydir` 用于处理包含 `.sas` 文件的目录，该命令将以递归的方式自动查找扩展名为 `.sas` 的文件并进行处理，非 `.sas` 文件将被忽略。
 
-```bash
-submit copydir "/source" "/dest"
-```
+可用的选项如下：
 
-其中，`/source` 是需要处理的 `.sas` 文件所在目录，`/dest` 是处理后保存的 `.txt` 文件所在目录。
+#### `-s, --sas-dir`
 
-#### --convert-mode
+指定包含需裁剪的 sas 代码的目录路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-同 [`--convert-mode`](#--convert-mode)
+#### `-t, --txt-dir`
 
-#### --macro-subs
+指定裁剪后的 sas 代码保存的目录路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-同 [`--macro-subs`](#--macro-subs)
+#### `--positive`
 
-#### --encoding
+同 [--positive](#--positive)
+
+#### `--no-positive`
+
+同 [--no-positive](#--no-positive)
+
+#### `--negative`
+
+同 [--negative](#--negative)
+
+#### `--no-negative`
+
+同 [--no-negative](#--no-negative)
+
+#### `-e, --encoding`
 
 同 [`--encoding`](#--encoding)
 
-#### --merge
+#### `--merge`
 
-`--merge` 选项指定将所有 `.sas` 文件进行转换后合并到单个 `.txt` 文件。
-
-例如：
-
-```bash
-submit copydir "/source" "/dest" --merge "code.txt"
-```
-
-上述代码会将 `/source` 目录中的所有 `.sas` 文件转换成 `.txt` 文件，并将转换后的 `.txt` 文件合并到 `/dest/code.txt` 中。
+指定是否将所有处理后的代码合并到一个文件中。
 
 > [!NOTE]
 >
-> 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*======`_`filename`_`.txt======*/` 分隔来自不同 `.sas` 文件的代码。
-> 其中 _`filename`_ 是源目录中 `.sas` 文件名称（不含扩展名）。
+> 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*====================`_`filename`_`.sas====================*/` 分隔来自不同 `.sas` 文件的代码。
+> 其中 _`filename`_ 是源目录中 `.sas` 文件名称。
 
 > [!IMPORTANT]
 >
 > 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
 
-#### --exclude-dirs
+#### `--merge-name`
 
-`--exclude-dirs` 选项指定排除的目录列表，这些目录中的文件将会被跳过处理。该选项支持 `glob` 模式，详见 [glob 模式介绍](#glob-模式介绍)。
+指定合并后的文件名，默认值为 `merged.txt`，仅当指定了 `--merge` 选项时有效。
 
-```bash
-submit copydir "/source" "/dest" --exclude-dirs macro
-```
+#### `-exd, --exclude-dir`
 
-可同时指定多个目录：
+指定需排除的目录的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的目录中的 `.sas` 文件将被忽略。
 
-```bash
-submit copydir "/source" "/dest" --exclude-dirs macro qc initial
-```
+该选项可以多次使用，表示多个排除目录。
 
-上述命令将在目录名称匹配 `macro`, `qc` 或 `initial` 时跳过处理其中的文件。
+#### `-exf, --exclude-file`
 
-#### --exclude-files
+指定需排除的文件的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的文件将被忽略。
 
-`--exclude-files` 选项指定排除的文件列表，这些文件将会被跳过处理。该选项支持 `glob` 模式，详见 [glob 模式介绍](#glob-模式介绍)。
+该选项可以多次使用，表示多个排除文件。
+
+#### 示例
 
 ```bash
-submit copydir "/source" "/dest" --exclude-dirs macro --exclude-files fcmp.sas format.sas
+submit copydir "./adam" "./adam/output"
+submit copydir "./adam" "./adam/output" --exclude-file "**/deprecated*.sas"
+submit copydir "./adam" "./adam/output" --exclude-file "**/deprecated*.sas" --exclude-dir "sponser-only" --exclude-dir "test-only"
+submit copydir "./adam" "./adam/output" --merge --merge-name "all.txt"
 ```
-
-上述命令将在目录名称匹配 `macro` 时跳过处理其中的文件，并在文件名称匹配 `fcmp.sas` 或 `format.sas` （无论是否在 `macro` 目录中）时跳过处理。
 
 ### glob 模式介绍
 
@@ -320,84 +273,10 @@ D:.
 └─dest
 ```
 
-现在需要将 `source` 目录中的 `.sas` 文件转换为 `.txt` 文件，但忽略名称包含 `deprecated` 的文件。
-
-如果不使用 `glob` 模式，命令应该是这样的：
+现在需要将 `source` 目录中的 `.sas` 文件转换为 `.txt` 文件，但忽略名称包含 `deprecated` 的文件，可以使用以下命令：
 
 ```bash
-submit copydir source dest --exclude-files "f2-deprecated.sas" "f3-deprecated.sas" "t2-deprecated.sas" "t2-deprecated-20241221.sas" "t5-deprecated.sas" "t7-deprecated.sas"
-```
-
-使用 `glob` 模式，命令得到简化：
-
-```bash
-submit copydir source dest --exclude-files "*deprecated*.sas"
-```
-
-### 命令行选项参考
-
-#### submit
-
-```bash
-Usage: submit [OPTIONS] COMMAND [ARGS]...
-
-  sas 代码裁剪工具
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  copydir   处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
-  copyfile  处理单个 sas 文件，保存处理后的代码到 txt 文件中。
-```
-
-#### submit copyfile
-
-```bash
-Usage: submit copyfile [OPTIONS]
-
-  处理单个 sas 文件，保存处理后的代码到 txt 文件中。
-
-Options:
-  -s, --sas-file FILE         包含需裁剪的 sas 代码的文件路径  [required]
-  -t, --txt-file PATH         裁剪后的 sas 代码保存的文件路径  [required]
-  --positive / --no-positive  是否处理 positive 模式的注释
-  --negative / --no-negative  是否处理 negative 模式的注释，优先级高于 --positive
-  -e, --encoding TEXT         字符编码，默认值为 gbk
-  --help                      Show this message and exit.
-```
-
-#### submit copydir
-
-```bash
-Usage: submit copydir [OPTIONS]
-
-  处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
-
-Options:
-  -s, --sas-dir DIRECTORY     包含需裁剪的 sas 代码的目录路径  [required]
-  -t, --txt-dir PATH          裁剪后的 sas 代码保存的目录路径  [required]
-  --positive / --no-positive  是否处理 positive 模式的注释
-  --negative / --no-negative  是否处理 negative 模式的注释，优先级高于 --positive
-  -e, --encoding TEXT         字符编码，默认值为 gbk
-  --merge / --no-merge        是否将所有处理后的代码合并到一个文件中
-  --merge-name TEXT           合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效
-  -exd, --exclude-dir TEXT    排除的目录路径模式
-  -exf, --exclude-file TEXT   排除的文件路径模式
-  --help                      Show this message and exit.
-```
-
-### bat 脚本编写示例
-
-`.bat` 文件是一种[批处理文件](https://en.wikipedia.org/wiki/Batch_file)，你可以将多条 `submit` 命令保存在单个 `.bat` 文件中，这样只需双击这个文件即可批量处理 `.sas` 文件。
-
-例如：
-
-```bash
-submit copydir "../04 ADS程序/01 主程序" "./03 程序代码/01 ADaM"
-submit copydir "../05 TFL程序/01 主程序" "./03 程序代码/02 TFL" --exclude-dirs sponser_only
-submit copydir "../09 Macro/01 Main" "./03 程序代码/03 Macro" --convert-mode negative
-pause
+submit copydir --s "~/source" -t "~/dest" --exclude-file "*deprecated*.sas"
 ```
 
 ## 如何贡献
@@ -428,7 +307,7 @@ pause
    uv run pytest
    ```
 
-6. 发起 pull request
+5. 发起 pull request
 
 > [!NOTE]
 >
