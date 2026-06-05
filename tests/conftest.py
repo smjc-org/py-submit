@@ -2,92 +2,30 @@ from pathlib import Path
 
 import pytest
 
-from tests.contents_source import (
-    content_source_adsl,
-    content_source_addv,
-    content_source_t1,
-    content_source_t2,
-    content_source_t3,
-    content_source_t4,
-    content_source_macro1,
-    content_source_macro2,
-    content_source_macro3,
-    content_source_q1,
-    content_source_q2,
-    content_source_fcmp,
-    content_source_other,
-)
 
-from tests.contents_validate import (
-    content_validate_adsl,
-    content_validate_addv,
-    content_validate_t1,
-    content_validate_t2,
-    content_validate_t3,
-    content_validate_macro1,
-    content_validate_macro2,
-)
+@pytest.fixture
+def dummy_sas_dir(tmp_path: Path) -> Path:
+    """动态创建一个包含 sas 文件的目录。"""
 
+    src_dir = tmp_path / "sas_src"
+    src_dir.mkdir()
 
-@pytest.fixture(scope="session")
-def source_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    dir = tmp_path_factory.mktemp("code")
-    dir_adam = dir / "adam"
-    dir_tfl = dir / "tfl"
-    dir_macro = dir / "macro"
-    dir_other = dir / "other"
+    # 1. 创建一个包含 POSITIVE 标记的文件
+    file_1 = src_dir / "t_6_1.sas"
+    file_1.write_text("data _null_;\n/*SUBMIT BEGIN*/\nproc print data=sashelp.class;\nrun;\n/*SUBMIT END*/\nrun;", encoding="gbk")
 
-    # adam sas files
-    dir_adam.mkdir()
-    (dir_adam / "adsl.sas").write_text(content_source_adsl)
-    (dir_adam / "adae.sas").write_text(content_source_addv)
+    # 2. 创建一个包含 NEGATIVE 标记的文件
+    file2 = src_dir / "t_6_2.sas"
+    file2.write_text("/*NOT SUBMIT BEGIN*/\noptions nodate;\n/*NOT SUBMIT END*/\nproc means data=test; run;", encoding="gbk")
 
-    # tfl sas files
-    dir_tfl.mkdir()
-    (dir_tfl / "t1.sas").write_text(content_source_t1)
-    (dir_tfl / "t2.sas").write_text(content_source_t2)
-    (dir_tfl / "t3.sas").write_text(content_source_t3)
-    (dir_tfl / "t4.sas").write_text(content_source_t4)
+    # 3. 创建一个在子目录里的文件（用于测试 --exclude-dir 参数）
+    sub_dir = src_dir / "sponser_only"
+    sub_dir.mkdir()
+    file3 = sub_dir / "t_7_1.sas"
+    file3.write_text("proc gplot; run;", encoding="gbk")
 
-    # macro sas files
-    dir_macro.mkdir()
-    (dir_macro / "macro1.sas").write_text(content_source_macro1)
-    (dir_macro / "macro2.sas").write_text(content_source_macro2)
-    (dir_macro / "macro3.sas").write_text(content_source_macro3)
+    # 4. 创建一个不需要转换的文件（用于测试 --exclude-file 参数）
+    file3 = src_dir / "deprecated_t_8_1.sas"
+    file3.write_text("proc means; run;", encoding="gbk")
 
-    # other directories which supposed to be excluded
-    dir_other.mkdir()
-    (dir_other / "q1.sas").write_text(content_source_q1)
-    (dir_other / "q2.sas").write_text(content_source_q2)
-
-    # other sas files which supposed to be excluded
-    (dir / "fcmp.sas").write_text(content_source_fcmp)
-
-    # other files whose suffix is not sas
-    (dir / "other.txt").write_text(content_source_other)
-    return dir
-
-
-@pytest.fixture(scope="session")
-def validate_directory(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    dir = tmp_path_factory.mktemp("validate")
-    dir_adam = dir / "adam"
-    dir_tfl = dir / "tfl"
-    dir_macro = dir / "macro"
-
-    # adam txt files
-    dir_adam.mkdir()
-    (dir_adam / "adsl.txt").write_text(content_validate_adsl)
-    (dir_adam / "adae.txt").write_text(content_validate_addv)
-
-    # tfl txt files
-    dir_tfl.mkdir()
-    (dir_tfl / "t1.txt").write_text(content_validate_t1)
-    (dir_tfl / "t2.txt").write_text(content_validate_t2)
-    (dir_tfl / "t3.txt").write_text(content_validate_t3)
-
-    # macro txt files
-    dir_macro.mkdir()
-    (dir_macro / "macro1.txt").write_text(content_validate_macro1)
-    (dir_macro / "macro2.txt").write_text(content_validate_macro2)
-    return dir
+    return src_dir

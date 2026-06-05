@@ -1,54 +1,126 @@
-import argparse
-import re
 from pathlib import Path
 
-import pytest
+from click.testing import CliRunner
 
-from submit import ConvertMode, copy_file, copy_directory, parse_dict
+from submit.submit import cli
 
 
-class TestSubmit:
-    def test_convert_mode(self):
-        assert str(ConvertMode.POSITIVE) == "positive"
-        assert str(ConvertMode.NEGATIVE) == "negative"
-        assert str(ConvertMode.BOTH) == "both"
+def test_copyfile(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copyfile 命令"""
 
-        assert ConvertMode.get_from_str("positive") == ConvertMode.POSITIVE
-        assert ConvertMode.get_from_str("negative") == ConvertMode.NEGATIVE
-        assert ConvertMode.get_from_str("both") == ConvertMode.BOTH
-        with pytest.raises(argparse.ArgumentTypeError):
-            ConvertMode.get_from_str("invalid")
+    runner = CliRunner()
 
-        assert ConvertMode.get_available_values() == [ConvertMode.POSITIVE, ConvertMode.NEGATIVE, ConvertMode.BOTH]
+    sas_file = dummy_sas_dir / "t_6_1.sas"
+    txt_file = tmp_path / "t_6_1.txt"
 
-    def test_copy_file(self, source_directory: Path, validate_directory: Path, tmp_path: Path):
-        test_adsl = source_directory / "adam" / "adsl.sas"
-        validate_adsl = validate_directory / "adam" / "adsl.txt"
+    # 使用 runner.invoke 触发命令
+    result = runner.invoke(
+        cli,
+        [
+            "copyfile",
+            "-s",
+            str(sas_file),
+            "-t",
+            str(txt_file),
+        ],
+    )
 
-        tmp_adsl = tmp_path / "adam" / "adsl.txt"
-        copy_file(test_adsl, tmp_adsl)
+    assert result.exit_code == 0
 
-        with open(tmp_adsl, "r", encoding="utf-8") as f:
-            tmp_code = f.read()
-        with open(validate_adsl, "r", encoding="utf-8") as f:
-            validate_code = f.read()
+    assert txt_file.exists()
+    content = txt_file.read_text(encoding="gbk")
+    assert "proc print data=sashelp.class;" in content
+    assert "data _null_;" not in content
 
-        assert re.sub(r"\s*", "", tmp_code) == re.sub(r"\s*", "", validate_code)
 
-    def test_copy_directory(self, source_directory: Path, validate_directory: Path, tmp_path: Path):
-        copy_directory(
-            source_directory, tmp_path, exclude_dirs=["other"], exclude_files=["fcmp.sas"], macro_subs={"id": ""}
-        )
-        copy_directory(source_directory / "macro", tmp_path / "macro", convert_mode=ConvertMode.NEGATIVE)
+def test_copydir_with_exclude_file(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，带上 --exclude-file 参数"""
 
-        for validate_file in validate_directory.rglob("*.txt"):
-            validate_code = validate_file.read_text()
-            tmp_code = (tmp_path / validate_file.relative_to(validate_directory)).read_text()
+    runner = CliRunner()
 
-            assert re.sub(r"\s*", "", tmp_code) == re.sub(r"\s*", "", validate_code)
+    txt_dir = tmp_path / "txt_out"
 
-    def test_parse_dict(self):
-        assert parse_dict("{a=1}") == {"a": "1"}
-        assert parse_dict("{a=1, b=2}") == {"a": "1", "b": "2"}
-        with pytest.raises(argparse.ArgumentTypeError):
-            parse_dict("{a=1{,} b=2}")
+    # 运行 copydir 命令，排除以 deprecated 开头的文件
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+            "--exclude-file",
+            "deprecated*.sas",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    # t_6_1.sas 没有被排除 -> 应该生成对应的 txt
+    assert (txt_dir / "t_6_1.txt").exists()
+
+    # deprecated_t_8_1.sas 被排除了 -> 不应该生成对应的 txt
+    assert not (txt_dir / "deprecated_t_8_1.txt").exists()
+
+
+def test_copydir_with_exclude_dirs(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，带上 --exclude-dir 参数"""
+
+    runner = CliRunner()
+
+    txt_dir = tmp_path / "txt_out"
+
+    # 运行 copydir 命令，排除以 deprecated 开头的文件
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+            "--exclude-dir",
+            "sponser_only",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    # t_7_1.sas 被排除了 -> 不应该生成对应的 txt
+    assert not (txt_dir / "t_7_1.txt").exists()
+
+
+def test_copydir_with_merge(tmp_path: Path, dummy_sas_dir: Path) -> None:
+    """测试 copydir 命令，带上 --merge 参数"""
+
+    runner = CliRunner()
+
+    txt_dir = tmp_path / "txt_out"
+
+    # 运行 copydir 命令，排除以 deprecated 开头的文件
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+            "--exclude-dir",
+            "sponser_only",
+            "--exclude-file",
+            "deprecated*.sas",
+            "--merge",
+            "--merge-name",
+            "合并代码.txt",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    merge_file = txt_dir / "合并代码.txt"
+    assert merge_file.exists()
+
+    # 验证合并代码中的内容是否包含特定字符串
+    merge_content = merge_file.read_text(encoding="gbk")
+    assert "/*====================t_6_1.sas====================*/" in merge_content

@@ -96,7 +96,6 @@ quit;
 
 ```bash
 submit copyfile "adae.sas" "adae.txt"
-submit cpf "adae.sas" "adae.txt"
 ```
 
 其中，`adae.sas` 是需要处理的 `.sas` 文件路径，`adae.txt` 是处理后保存的 `.txt` 文件路径。
@@ -337,45 +336,55 @@ submit copydir source dest --exclude-files "*deprecated*.sas"
 
 ### 命令行选项参考
 
+#### submit
+
+```bash
+Usage: submit [OPTIONS] COMMAND [ARGS]...
+
+  sas 代码裁剪工具
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  copydir   处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
+  copyfile  处理单个 sas 文件，保存处理后的代码到 txt 文件中。
+```
+
 #### submit copyfile
 
 ```bash
-usage: submit [options] copyfile [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] sas_file txt_file
+Usage: submit copyfile [OPTIONS]
 
-positional arguments:
-  sas_file              SAS 文件路径
-  txt_file              TXT 文件路径
+  处理单个 sas 文件，保存处理后的代码到 txt 文件中。
 
-options:
-  -h, --help            show this help message and exit
-  -c, --convert-mode {positive,negative,both}
-                        转换模式（默认 both）
-  --macro-subs MACRO_SUBS
-                        宏变量替换，格式为 {key=value,...}（默认无）
-  --encoding ENCODING   编码格式（默认自动检测）
+Options:
+  -s, --sas-file FILE         包含需裁剪的 sas 代码的文件路径  [required]
+  -t, --txt-file PATH         裁剪后的 sas 代码保存的文件路径  [required]
+  --positive / --no-positive  是否处理 positive 模式的注释
+  --negative / --no-negative  是否处理 negative 模式的注释，优先级高于 --positive
+  -e, --encoding TEXT         字符编码，默认值为 gbk
+  --help                      Show this message and exit.
 ```
 
 #### submit copydir
 
 ```bash
-usage: submit [options] copydir [-h] [-c {positive,negative,both}] [--macro-subs MACRO_SUBS] [--encoding ENCODING] [-mrg MERGE] [-exf [EXCLUDE_FILES ...]] [-exd [EXCLUDE_DIRS ...]] sas_dir txt_dir
+Usage: submit copydir [OPTIONS]
 
-positional arguments:
-  sas_dir               SAS 文件目录
-  txt_dir               TXT 文件目录
+  处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
 
-options:
-  -h, --help            show this help message and exit
-  -c, --convert-mode {positive,negative,both}
-                        转换模式（默认 both）
-  --macro-subs MACRO_SUBS
-                        宏变量替换，格式为 {key=value,...}（默认无）
-  --encoding ENCODING   编码格式（默认自动检测）
-  -mrg, --merge MERGE   合并到一个文件（默认无）
-  -exf, --exclude-files [EXCLUDE_FILES ...]
-                        排除文件列表（默认无）
-  -exd, --exclude-dirs [EXCLUDE_DIRS ...]
-                        排除目录列表（默认无）
+Options:
+  -s, --sas-dir DIRECTORY     包含需裁剪的 sas 代码的目录路径  [required]
+  -t, --txt-dir PATH          裁剪后的 sas 代码保存的目录路径  [required]
+  --positive / --no-positive  是否处理 positive 模式的注释
+  --negative / --no-negative  是否处理 negative 模式的注释，优先级高于 --positive
+  -e, --encoding TEXT         字符编码，默认值为 gbk
+  --merge / --no-merge        是否将所有处理后的代码合并到一个文件中
+  --merge-name TEXT           合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效
+  -exd, --exclude-dir TEXT    排除的目录路径模式
+  -exf, --exclude-file TEXT   排除的文件路径模式
+  --help                      Show this message and exit.
 ```
 
 ### bat 脚本编写示例
@@ -385,9 +394,10 @@ options:
 例如：
 
 ```bash
-submit copydir "D:/project/code/adam" "D:/project/submit/adam"
-submit copydir "D:/project/code/tfl" "D:/project/submit/tfl" --exclude-files merge.sas
-submit copydir "D:/project/code/macro" "D:/project/submit/macro" --convert-mode negative
+submit copydir "../04 ADS程序/01 主程序" "./03 程序代码/01 ADaM"
+submit copydir "../05 TFL程序/01 主程序" "./03 程序代码/02 TFL" --exclude-dirs sponser_only
+submit copydir "../09 Macro/01 Main" "./03 程序代码/03 Macro" --convert-mode negative
+pause
 ```
 
 ## 如何贡献
@@ -407,27 +417,16 @@ submit copydir "D:/project/code/macro" "D:/project/submit/macro" --convert-mode 
 2. 安装依赖
 
    ```bash
-   uv sync
+   uv sync --all-groups
    ```
 
-3. 安装 pre-commit
+3. 修改代码
+
+4. 测试代码
 
    ```bash
-   pre-commit install
-   pre-commit install --hook-type commit-msg
+   uv run pytest
    ```
-
-4. 修改代码
-
-5. 测试代码
-
-   ```bash
-   pytest
-   ```
-
-> [!NOTE]
->
-> 执行 `pytest` 命令前需要先激活虚拟环境。
 
 6. 发起 pull request
 
