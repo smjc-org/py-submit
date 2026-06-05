@@ -1,17 +1,22 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "submit"
 version = "0.5.6"
-description = "Extract code block which should be submitted to regulatory agency."
+description = "Crop the SAS code to meet the submission requirements"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["chardet>=5.2.0", "natsort>=8.4.0"]
+dependencies = [
+    "click>=8.4.1",
+    "natsort>=8.4.0"
+]
 authors = [{ name = "Snoopy1866" }]
 license = { file = "LICENSE" }
-keywords = ["sas", "nmpa", "regulatory", "guidelines", "submit"]
+keywords = [
+    "sas",
+    "nmpa",
+    "regulatory",
+    "guidelines",
+    "submit"
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -22,7 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.13"
 ]
 
 [project.urls]
@@ -33,7 +38,11 @@ Issues = "https://github.com/smjc-org/py-submit/issues"
 Changelog = "https://github.com/smjc-org/py-submit/tree/main/CHANGELOG.md"
 
 [project.scripts]
-submit = "submit:main"
+submit = "submit.submit:cli"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
@@ -53,4 +62,4 @@ verbosity_test_cases = 2
 verbosity_assertions = 2
 
 [tool.ruff]
-line-length = 120
+line-length = 144
