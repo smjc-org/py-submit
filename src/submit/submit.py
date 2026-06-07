@@ -159,7 +159,7 @@ def copy_file(
 @click.option("-sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
 @click.option("--merge/--no-merge", is_flag=True, help="是否将所有处理后的代码合并到一个文件中")
-@click.option("--merge-name", default="merged.txt", type=str, help="合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效")
+@click.option("--merge-name", default="merged.txt", type=str, help="合并后的文件名，默认值为 merged.txt，仅当指定了 --merge 选项时有效")
 @click.option("-exd", "--exclude-dir", multiple=True, type=str, help="排除的目录路径模式")
 @click.option("-exf", "--exclude-file", multiple=True, type=str, help="排除的文件路径模式")
 def copy_directory(
