@@ -156,7 +156,7 @@ def copy_file(
 )
 @click.option("--positive/--no-positive", is_flag=True, default=True, help="是否处理 positive 模式的注释")
 @click.option("--negative/--no-negative", is_flag=True, default=True, help="是否处理 negative 模式的注释，优先级高于 --positive")
-@click.option("--sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
+@click.option("-sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
 @click.option("--merge/--no-merge", is_flag=True, help="是否将所有处理后的代码合并到一个文件中")
 @click.option("--merge-name", default="merged.txt", type=str, help="合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效")
