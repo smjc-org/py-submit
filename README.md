@@ -102,7 +102,7 @@ proc means data = adsl;
 run;
 ```
 
-更多选项及其用法请参考 [选项参考](./docs/usage.md)
+更多选项及其用法请参考 [CLI](./docs/usage.md)。
 
 ## 如何贡献
 
