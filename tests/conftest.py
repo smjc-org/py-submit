@@ -11,35 +11,39 @@ def dummy_sas_dir(tmp_path: Path) -> Path:
     src_dir.mkdir()
 
     # 包含 POSITIVE 标记的文件
-    file_1 = src_dir / "t_6_1.sas"
-    file_1.write_text("data _null_;\n/*SUBMIT BEGIN*/\nproc print data=sashelp.class;\nrun;\n/*SUBMIT END*/\nrun;", encoding="gbk")
+    file = src_dir / "t_6_1.sas"
+    file.write_text("data _null_;\n/*SUBMIT BEGIN*/\nproc print data=sashelp.class;\nrun;\n/*SUBMIT END*/\nrun;", encoding="gbk")
 
     # 包含 NEGATIVE 标记的文件
-    file2 = src_dir / "t_6_2.sas"
-    file2.write_text("/*NOT SUBMIT BEGIN*/\noptions nodate;\n/*NOT SUBMIT END*/\nproc means data=test; run;", encoding="gbk")
+    file = src_dir / "t_6_2.sas"
+    file.write_text("/*NOT SUBMIT BEGIN*/\noptions nodate;\n/*NOT SUBMIT END*/\nproc means data=test; run;", encoding="gbk")
 
     # 包含不完整 POSITIVE 标记的文件
-    file3 = src_dir / "t_6_3.sas"
-    file3.write_text("/*SUBMIT BEGIN*/\nproc print data=sashelp.class;\nrun;", encoding="gbk")
+    file = src_dir / "t_6_3.sas"
+    file.write_text("/*SUBMIT BEGIN*/\nproc print data=sashelp.class;\nrun;", encoding="gbk")
 
-    file4 = src_dir / "t_6_4.sas"
-    file4.write_text("proc print data=sashelp.class;\nrun;\n/*SUBMIT END*/", encoding="gbk")
+    file = src_dir / "t_6_4.sas"
+    file.write_text("proc print data=sashelp.class;\nrun;\n/*SUBMIT END*/", encoding="gbk")
 
     # 包含不完整 NEGATIVE 标记的文件
-    file5 = src_dir / "t_6_5.sas"
-    file5.write_text("/*NOT SUBMIT BEGIN*/\noptions nodate;\nproc means data=test; run;", encoding="gbk")
+    file = src_dir / "t_6_5.sas"
+    file.write_text("/*NOT SUBMIT BEGIN*/\noptions nodate;\nproc means data=test; run;", encoding="gbk")
 
-    file6 = src_dir / "t_6_6.sas"
-    file6.write_text("proc means; run;\n/*NOT SUBMIT END*/", encoding="gbk")
+    file = src_dir / "t_6_6.sas"
+    file.write_text("proc means; run;\n/*NOT SUBMIT END*/", encoding="gbk")
+
+    # 包含宏变量的文件
+    file = src_dir / "t_6_7.sas"
+    file.write_text("data _null_;\n/*SUBMIT BEGIN*/\nproc print data=&indata;\nrun;&&indata;&indatabase;\n/*SUBMIT END*/\nrun;")
 
     # 在子目录里的文件（用于测试 --exclude-dir 参数）
     sub_dir = src_dir / "sponser_only"
     sub_dir.mkdir()
-    file3 = sub_dir / "t_7_1.sas"
-    file3.write_text("proc gplot; run;", encoding="gbk")
+    file = sub_dir / "t_7_1.sas"
+    file.write_text("proc gplot; run;", encoding="gbk")
 
     # 不需要转换的文件（用于测试 --exclude-file 参数）
-    file3 = src_dir / "deprecated_t_8_1.sas"
-    file3.write_text("proc means; run;", encoding="gbk")
+    file = src_dir / "deprecated_t_8_1.sas"
+    file.write_text("proc means; run;", encoding="gbk")
 
     return src_dir

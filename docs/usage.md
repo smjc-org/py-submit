@@ -28,6 +28,10 @@
 
 指定不要处理 _negative_ 模式的注释。
 
+### `-sub, --substitute`
+
+指定需替换的宏变量和宏变量的值，该选项可以多次使用，表示多个替换项。
+
 ### `-e, --encoding`
 
 指定 `.sas` 文件的字符编码，默认值为 `gbk`。
@@ -41,6 +45,7 @@
 ```bash
 submit copyfile -s "./adae.sas" "./output/adae.txt"
 submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative
+submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --substitute "id" "%str()" --substitute "indata" "adeff"
 submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --encoding utf-8
 ```
 
@@ -73,6 +78,10 @@ submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --encoding utf
 ### `--no-negative`
 
 同 [--no-negative](#--no-negative)
+
+### `-sub, --substitute`
+
+同 [--substitute](#-sub---substitute)
 
 ### `-e, --encoding`
 

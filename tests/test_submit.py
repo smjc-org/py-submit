@@ -33,6 +33,44 @@ def test_copyfile(dummy_sas_dir: Path, tmp_path: Path) -> None:
     assert "data _null_;" not in content
 
 
+def test_copyfile_with_substitute(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copyfile 命令，带上 --substitute 参数"""
+
+    runner = CliRunner()
+
+    sas_file = dummy_sas_dir / "t_6_7.sas"
+    txt_file = tmp_path / "t_6_7.txt"
+
+    result = runner.invoke(
+        cli,
+        [
+            "copyfile",
+            "-s",
+            str(sas_file),
+            "-t",
+            str(txt_file),
+            "-sub",
+            "indata",
+            "adsl",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert txt_file.exists()
+
+    content = txt_file.read_text(encoding="gbk")
+
+    # &indata 被替换成 adsl
+    assert "proc print data=adsl;" in content
+
+    # &&indata 没有被替换
+    assert "&&indata" in content
+
+    # &indatabase 没有被替换
+    assert "&indatabase" in content
+
+
 def test_copydir_with_exclude_file(dummy_sas_dir: Path, tmp_path: Path) -> None:
     """测试 copydir 命令，带上 --exclude-file 参数"""
 

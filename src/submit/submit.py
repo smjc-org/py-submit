@@ -22,10 +22,6 @@ POSITIVE_COMMENT_END = rf"\/\*{SYLBOMS}*SUBMIT\s*END{SYLBOMS}*\*\/"
 NEGATIVE_COMMENT_BEGIN = rf"\/\*{SYLBOMS}*NOT\s*SUBMIT\s*BEGIN{SYLBOMS}*\*\/"
 NEGATIVE_COMMENT_END = rf"\/\*{SYLBOMS}*NOT\s*SUBMIT\s*END{SYLBOMS}*\*\/"
 
-# 宏变量
-# 仅支持一层宏变量引用（例如：&id），不支持嵌套宏变量引用（例如：&&id、&&&id）
-MACRO_VAR = r"(?<!&)(&[A-Za-z_][A-Za-z0_9_]*)"
-
 
 @dataclass
 class CopyFileTask:
@@ -33,6 +29,7 @@ class CopyFileTask:
     txt_file: Path
     positive: bool
     negative: bool
+    substitute: dict[str, str]
     encoding: str
 
 
@@ -40,6 +37,7 @@ def _cut_code(
     file: Path,
     positive: bool = True,
     negative: bool = True,
+    substitute: dict[str, str] = {},
     encoding: str = "gbk",
 ) -> None:
     """裁剪代码。
@@ -49,6 +47,7 @@ def _cut_code(
         positive (bool): 是否处理 positive 模式的注释。
         negative (bool): 是否处理 negative 模式的注释，优先级高于 `positive`。
         encoding (str, optional): 字符编码。
+        substitute (dict[str, str], optional): 宏变量替换字典。
     """
 
     re_flags = re.I | re.S
@@ -82,15 +81,17 @@ def _cut_code(
             pass
 
     # 替换宏变量
-    # --TODO--
+    if substitute:
+        for macro, value in substitute.items():
+            code = re.sub(rf"(?<!&)&{macro}(?![A-Za-z_])", value, code, flags=re_flags)
 
     return code.strip()
 
 
-def _copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, encoding: str) -> None:
+def _copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, substitute: dict[str, str], encoding: str) -> None:
     """处理单个 sas 文件，保存处理后的代码到 txt 文件中。"""
 
-    code = _cut_code(sas_file, positive, negative, encoding)
+    code = _cut_code(sas_file, positive, negative, substitute, encoding)
 
     txt_file_dir = txt_file.parent
     if not txt_file_dir.exists():
@@ -121,11 +122,21 @@ def cli() -> None:
 )
 @click.option("--positive/--no-positive", is_flag=True, default=True, help="是否处理 positive 模式的注释")
 @click.option("--negative/--no-negative", is_flag=True, default=True, help="是否处理 negative 模式的注释，优先级高于 --positive")
+@click.option("-sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
-def copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, encoding: str) -> None:
+def copy_file(
+    sas_file: Path,
+    txt_file: Path,
+    positive: bool,
+    negative: bool,
+    substitute: tuple[tuple[str, str], ...],
+    encoding: str,
+) -> None:
     """处理单个 sas 文件，保存处理后的代码到 txt 文件中。"""
 
-    _copy_file(sas_file, txt_file, positive, negative, encoding)
+    if substitute:
+        substitute = dict(substitute)
+    _copy_file(sas_file, txt_file, positive, negative, substitute, encoding)
 
 
 @cli.command(name="copydir", help="处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。")
@@ -145,6 +156,7 @@ def copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, en
 )
 @click.option("--positive/--no-positive", is_flag=True, default=True, help="是否处理 positive 模式的注释")
 @click.option("--negative/--no-negative", is_flag=True, default=True, help="是否处理 negative 模式的注释，优先级高于 --positive")
+@click.option("--sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
 @click.option("--merge/--no-merge", is_flag=True, help="是否将所有处理后的代码合并到一个文件中")
 @click.option("--merge-name", default="merged.txt", type=str, help="合并后的文件名，默认值为 merged.txt，仅当 --merge 选项为 True 时有效")
@@ -155,6 +167,7 @@ def copy_directory(
     txt_dir: Path,
     positive: bool = True,
     negative: bool = True,
+    substitute: tuple[tuple[str, str], ...] = ((),),
     encoding: str = "gbk",
     merge: bool = False,
     merge_name: str = "merged.txt",
@@ -168,12 +181,16 @@ def copy_directory(
         txt_dir (Path): 存储 txt 文件的目录路径。
         positive (bool): 是否处理 positive 模式的注释。
         negative (bool): 是否处理 negative 模式的注释，优先级高于 `positive`。
+        substitute (tuple[tuple[str, str], ...]): 宏变量替换键值对。
         encoding (str): 字符编码。
         merge (bool): 是否将所有处理后的代码合并到一个文件中。
         merge_name (str): 合并后的文件名，默认值为 `'merged.txt'`，仅当 `merge` 选项为 True 时有效。
         exclude_file (tuple[Path, ...]): 排除的文件路径。
         exclude_dir (tuple[Path, ...]): 排除的目录路径。
     """
+
+    if substitute:
+        substitute = dict(substitute)
 
     resolved_exclude_dirs: set[Path] = set()
     resolved_exclude_files: set[Path] = set()
@@ -209,7 +226,9 @@ def copy_directory(
                 dirrelpath = dirpath.relative_to(sas_dir)
                 txt_file = txt_dir / dirrelpath / file.replace(".sas", ".txt")
                 copy_file_tasks.append(
-                    CopyFileTask(sas_file=fileabspath, txt_file=txt_file, positive=positive, negative=negative, encoding=encoding)
+                    CopyFileTask(
+                        sas_file=fileabspath, txt_file=txt_file, positive=positive, negative=negative, substitute=substitute, encoding=encoding
+                    )
                 )
 
     if not copy_file_tasks:
@@ -229,7 +248,7 @@ def copy_directory(
             for task in sorted_copy_file_tasks:
                 f.write(f"/*===================={task.sas_file.name}====================*/\n\n")
 
-                code_content = _cut_code(task.sas_file, task.positive, task.negative, task.encoding)
+                code_content = _cut_code(task.sas_file, task.positive, task.negative, task.substitute, task.encoding)
                 f.write(code_content)
 
                 f.write("\n\n\n")
@@ -237,5 +256,5 @@ def copy_directory(
         click.secho(f"已生成文件：{merge_file.absolute()}", fg="green")
     else:  # 不合并文件
         for task in copy_file_tasks:
-            _copy_file(task.sas_file, task.txt_file, task.positive, task.negative, task.encoding)
+            _copy_file(task.sas_file, task.txt_file, task.positive, task.negative, task.substitute, task.encoding)
             click.secho(f"已转换文件：{task.sas_file.absolute()}", fg="green")
