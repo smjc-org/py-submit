@@ -104,7 +104,7 @@
 
 - `--positive/--no-positive`, _optional_
 
-  同 [--positive/--no-positive](#--positive/--no-positive)
+  同 [`--positive/--no-positive`](#--positive/--no-positive)
 
   ```bash
   submit copydir -s "./adam" -t "./output" --no-positive
@@ -112,7 +112,7 @@
 
 - `--negative/--no-negative`, _optional_
 
-  同 [--negative/--no-negative](#--negative/--no-negative)
+  同 [`--negative/--no-negative`](#--negative/--no-negative)
 
   ```bash
   submit copydir -s "./adam" -t "./output" --no-positive --no-negative
@@ -120,7 +120,7 @@
 
 - `-sub, --substitute`, _optional_
 
-  同 [--substitute](#--substitute)
+  同 [`-sub, --substitute`](#--substitute)
 
   ```bash
   submit copydir -s "./adam" -t "./output" --substitute "id" "%str()"
@@ -128,7 +128,7 @@
 
 - `-e, --encoding`, _optional_
 
-  同 [`--encoding`](#--encoding)
+  同 [`-e, --encoding`](#--encoding)
 
   ```bash
   submit copydir -s "./adam" -t "./output" --encoding "utf-8"
