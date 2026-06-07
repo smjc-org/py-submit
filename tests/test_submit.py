@@ -128,6 +128,45 @@ def test_copydir_with_exclude_dirs(dummy_sas_dir: Path, tmp_path: Path) -> None:
     assert not (txt_dir / "t_7_1.txt").exists()
 
 
+def test_copydir_with_substitute(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，带上 --substitute 参数"""
+
+    runner = CliRunner()
+
+    txt_dir = tmp_path / "txt_out"
+
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+            "-sub",
+            "indata",
+            "adsl",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    txt_file = txt_dir / "t_6_7.txt"
+
+    assert txt_file.exists()
+
+    content = txt_file.read_text(encoding="gbk")
+
+    # &indata 被替换成 adsl
+    assert "proc print data=adsl;" in content
+
+    # &&indata 没有被替换
+    assert "&&indata" in content
+
+    # &indatabase 没有被替换
+    assert "&indatabase" in content
+
+
 def test_copydir_with_merge(dummy_sas_dir: Path, tmp_path: Path) -> None:
     """测试 copydir 命令，带上 --merge 参数"""
 
