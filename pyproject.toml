@@ -1,6 +1,6 @@
 [project]
 name = "submit"
-version = "0.5.6"
+version = "0.6.0"
 description = "Crop the SAS code to meet the submission requirements"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,7 +50,7 @@ dev = [
     "pytest==8.4.2",
     "pytest-cov==6.1.1",
     "ruff==0.15.16",
-    "setuptools==82.0.1",
+    "setuptools==82.0.1"
 ]
 
 [tool.pytest.ini_options]
