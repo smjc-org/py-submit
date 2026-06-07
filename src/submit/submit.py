@@ -62,9 +62,9 @@ def _cut_code(
         if start_match and end_match:
             code = re.sub(rf"{NEGATIVE_COMMENT_BEGIN}.*?{NEGATIVE_COMMENT_END}", "", code, flags=re_flags)
         elif start_match is not None and end_match is None:
-            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释！", fg="red")
+            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
         elif start_match is None and end_match is not None:
-            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="red")
+            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
             pass
 
@@ -75,9 +75,9 @@ def _cut_code(
             code_segaments = re.findall(rf"{POSITIVE_COMMENT_BEGIN}(.*?){POSITIVE_COMMENT_END}", code, re_flags)
             code = "\n\n".join(code.strip() for code in code_segaments)
         elif start_match is not None and end_match is None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="red")
+            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
         elif start_match is None and end_match is not None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red")
+            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
             pass
 
@@ -198,6 +198,7 @@ def copy_directory(
             click.secho(f"已排除目录：{dirpath.absolute()}", fg="magenta")
             continue
         if txt_dir in dirpath.parents or dirpath == txt_dir:  # 如果当前目录是目标目录或其子目录，则跳过
+            click.secho(f"已跳过目录：{dirpath.absolute()}，跳过原因：输出目录与输入目录是同一目录，或输出目录在输入目录内", fg="magenta")
             continue
         for file in filenames:
             fileabspath = dirpath / file
