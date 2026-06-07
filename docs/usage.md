@@ -1,129 +1,194 @@
-# 选项参考
+# Command Line Interface Reference
 
-## 子命令 `copyfile`
+- `copyfile`
 
-子命令 `copyfile` 用于处理单个 `.sas` 文件，可用的选项如下：
+  裁剪单个 sas 文件，保存处理后的代码到 txt 文件中。
+  
+  具体选项详见 [`copyfile`](#copyfile)
 
-### `-s, -sas-file`
+  ```bash
+  submit copyfile ...
+  ```
 
-指定需裁剪的 `.sas` 文件路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+- `copydir`
 
-### `-t, -txt-file`
+  以递归的方式裁剪指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。
+  
+  具体选项详见 [`copydir`](#copydir)
 
-指定处理后的代码保存的 `.txt` 文件路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+  ```bash
+  submit copydir ...
+  ```
 
-### `--positive`
+- `--help`, _optional_
 
-指定处理 _positive_ 模式的注释。
+  显示帮助信息并退出。
 
-### `--no-positive`
+  ```bash
+  submit --help
+  ```
 
-指定不要处理 _positive_ 模式的注释。
+## `copyfile`
 
-### `--negative`
+- `-s, -sas-file`, _required_
 
-指定处理 _negative_ 模式的注释，优先级高于 `--positive`。
+  指定需裁剪的 `.sas` 文件路径。
+  
+  可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-### `--no-negative`
+- `-t, -txt-file`, _required_
 
-指定不要处理 _negative_ 模式的注释。
+  指定裁剪后的代码保存的 `.txt` 文件路径。
+  
+  可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-### `-sub, --substitute`
+- `--positive/--no-positive`, _optional_ <span id="--positive/--no-positive"></span>
 
-指定需替换的宏变量和宏变量的值，该选项可以多次使用，表示多个替换项。
+  指定是否处理 _positive_ 模式的注释，如未指定，默认使用 `--positive`。
 
-### `-e, --encoding`
+  ```bash
+  submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --no-positive
+  ```
 
-指定 `.sas` 文件的字符编码，默认值为 `gbk`。
+- `--negative/--no-negative`, _optional_ <span id="--negative/--no-negative"></span>
 
-### `--help`
+  指定是否处理 _negative_ 模式的注释，如未指定，默认使用 `--negative`。
 
-显示帮助信息并退出。
+  📌 `--negative` 优先级高于 `--positive`，这意味着如果同时指定了 `--positive` 和 `--negative`，程序会优先处理 _negative_ 模式的注释。
 
-### 示例
+  ```bash
+  submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --no-positive --no-negative
+  ```
 
-```bash
-submit copyfile -s "./adae.sas" "./output/adae.txt"
-submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative
-submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --substitute "id" "%str()" --substitute "indata" "adeff"
-submit copyfile -s "./adae.sas" "./output/adae.txt" --no-negative --encoding utf-8
-```
+- `-sub, --substitute`, _optional_ <span id="--substitute"></span>
 
-## 子命令 `copydir`
+  指定需替换的宏变量和宏变量的值，格式为 _`name`_ _`value`_。
 
-子命令 `copydir` 用于处理包含 `.sas` 文件的目录，该命令将以递归的方式自动查找扩展名为 `.sas` 的文件并进行处理，非 `.sas` 文件将被忽略。
+  例如：需要将代码中的宏变量 `&id` 替换为 `%str()`，可以指定 `--substitute "id" "%str()"`，程序只会将宏变量 `&id` 替换成 `%str()`，不会处理嵌套的宏变量（如：`&&id`, `&&&id`, ...）。
 
-可用的选项如下：
+  该选项可以多次使用，指定多个替换项。
 
-### `-s, --sas-dir`
+  ```bash
+  submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --substitute "id" "%str()"
+  ```
 
-指定包含需裁剪的 sas 代码的目录路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+- `-e, --encoding`, _optional_ <span id="--encoding"></span>
 
-### `-t, --txt-dir`
+  指定 `.sas` 文件的字符编码，默认值为 `gbk`。
 
-指定裁剪后的 sas 代码保存的目录路径，可以使用相对路径和绝对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
+  ```bash
+  submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --encoding "utf-8"
+  ```
 
-### `--positive`
+- `--help`, _optional_
 
-同 [--positive](#--positive)
+  显示帮助信息并退出。
 
-### `--no-positive`
+  ```bash
+  submit copyfile --help
+  ```
 
-同 [--no-positive](#--no-positive)
+## `copydir`
 
-### `--negative`
+- `-s, --sas-dir`, _required_
 
-同 [--negative](#--negative)
+  指定包含需裁剪的 sas 代码的目录路径。
+  
+  可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-### `--no-negative`
+- `-t, --txt-dir`, _required_
 
-同 [--no-negative](#--no-negative)
+  指定裁剪后的 sas 代码保存的目录路径。
+  
+  可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-### `-sub, --substitute`
+- `--positive/--no-positive`, _optional_
 
-同 [--substitute](#-sub---substitute)
+  同 [`--positive/--no-positive`](#--positive/--no-positive)
 
-### `-e, --encoding`
+  ```bash
+  submit copydir -s "./adam" -t "./output" --no-positive
+  ```
 
-同 [`--encoding`](#--encoding)
+- `--negative/--no-negative`, _optional_
 
-### `--merge`
+  同 [`--negative/--no-negative`](#--negative/--no-negative)
 
-指定是否将所有处理后的代码合并到一个文件中。
+  ```bash
+  submit copydir -s "./adam" -t "./output" --no-positive --no-negative
+  ```
+
+- `-sub, --substitute`, _optional_
+
+  同 [`-sub, --substitute`](#--substitute)
+
+  ```bash
+  submit copydir -s "./adam" -t "./output" --substitute "id" "%str()"
+  ```
+
+- `-e, --encoding`, _optional_
+
+  同 [`-e, --encoding`](#--encoding)
+
+  ```bash
+  submit copydir -s "./adam" -t "./output" --encoding "utf-8"
+  ```
+
+- `--merge`, _optional_
+
+  指定是否将所有处理后的代码合并到一个文件中。
 
 > [!NOTE]
 >
-> 合并后的 `.txt` 文件包含源目录中所有需要递交的 sas 代码，使用注释 `/*====================`_`filename`_`.sas====================*/` 分隔来自不同 `.sas` 文件的代码。
-> 其中 _`filename`_ 是源目录中 `.sas` 文件名称。
+> 合并后的 `.txt` 文件包含源目录中所有未被 `--exclude-dir` 和 `--exclude-file` 排除的 sas 代码。
+>
+> 使用注释 `/*====================`_`filename`_`.sas====================*/` 分隔来自不同文件的代码。
+> 其中 _`filename`_ 是源目录中 `.sas` 文件的名称。
 
 > [!IMPORTANT]
 >
-> 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
-
-### `--merge-name`
-
-指定合并后的文件名，默认值为 `merged.txt`，仅当指定了 `--merge` 选项时有效。
-
-### `-exd, --exclude-dir`
-
-指定需排除的目录的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的目录中的 `.sas` 文件将被忽略。
-
-该选项可以多次使用，表示多个排除目录。
-
-### `-exf, --exclude-file`
-
-指定需排除的文件的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的文件将被忽略。
-
-该选项可以多次使用，表示多个排除文件。
-
-### 示例
+> 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，
+> 因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
 
 ```bash
-submit copydir "./adam" "./adam/output"
-submit copydir "./adam" "./adam/output" --exclude-file "**/deprecated*.sas"
-submit copydir "./adam" "./adam/output" --exclude-file "**/deprecated*.sas" --exclude-dir "sponser-only" --exclude-dir "test-only"
-submit copydir "./adam" "./adam/output" --merge --merge-name "all.txt"
+submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
 ```
+
+- `--merge-name`, _optional_
+
+  指定合并后的文件名，默认值为 `merged.txt`，仅当指定了 `--merge` 选项时有效。
+
+  ```bash
+  submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge --merge-name "adam.txt"
+  ```
+
+- `-exd, --exclude-dir`, _optional_
+
+  指定需排除的目录的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的目录中的 `.sas` 文件将被忽略。
+
+  该选项可以多次使用，指定多个排除目录。
+
+  ```bash
+  submit copydir -s "./adam" -t "./output" --exclude-dir "sponser-only"
+  ```
+
+- `-exf, --exclude-file`, _optional_
+
+  指定需排除的文件的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的文件将被忽略。
+
+  ```bash
+  submit copydir -s "./adam" -t "./output" --exclude-file "**/deprecated*.sas"
+  ```
+
+  该选项可以多次使用，指定多个排除文件。
+
+- `--help`, _optional_
+
+  显示帮助信息并退出。
+
+  ```bash
+  submit copydir --help
+  ```
 
 ## glob 模式介绍
 
