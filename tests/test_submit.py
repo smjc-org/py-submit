@@ -90,7 +90,7 @@ def test_copydir_with_exclude_dirs(dummy_sas_dir: Path, tmp_path: Path) -> None:
     assert not (txt_dir / "t_7_1.txt").exists()
 
 
-def test_copydir_with_merge(tmp_path: Path, dummy_sas_dir: Path) -> None:
+def test_copydir_with_merge(dummy_sas_dir: Path, tmp_path: Path) -> None:
     """测试 copydir 命令，带上 --merge 参数"""
 
     runner = CliRunner()
@@ -124,3 +124,77 @@ def test_copydir_with_merge(tmp_path: Path, dummy_sas_dir: Path) -> None:
     # 验证合并代码中的内容是否包含特定字符串
     merge_content = merge_file.read_text(encoding="gbk")
     assert "/*====================t_6_1.sas====================*/" in merge_content
+
+
+def test_cutcode_incomplete_comment(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 cutcode 对不完整标记的识别"""
+
+    runner = CliRunner()
+
+    txt_dir = tmp_path / "txt_out"
+
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert "存在 POSITIVE 模式的起始注释，但未找到对应的终止注释" in result.stderr
+    assert "存在 POSITIVE 模式的终止注释，但未找到对应的起始注释" in result.stderr
+    assert "存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释" in result.stderr
+    assert "存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释" in result.stderr
+
+
+def test_copydir_no_files_need_process(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，没有需要处理的文件时"""
+
+    runner = CliRunner()
+
+    txt_dir = tmp_path / "txt_out"
+
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+            "--exclude-file",
+            "**/*.sas",
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert "未找到需要处理的 .sas 文件" in result.stdout
+
+
+def test_copydir_output_dir_inside_input_dir(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，输出目录在输入目录内"""
+
+    runner = CliRunner()
+
+    txt_dir = dummy_sas_dir / "sponser_only"
+
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(dummy_sas_dir),
+            "-t",
+            str(txt_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert "输出目录与输入目录是同一目录，或输出目录在输入目录内" in result.stdout
