@@ -32,6 +32,10 @@ def dummy_sas_dir(tmp_path: Path) -> Path:
     file = src_dir / "t_6_6.sas"
     file.write_text("proc means; run;\n/*NOT SUBMIT END*/", encoding="gbk")
 
+    # 不包含任何标记的文件
+    file = src_dir / "t_6_7.sas"
+    file.write_text("proc means; run;", encoding="gbk")
+
     # 包含宏变量的文件
     file = src_dir / "t_6_7.sas"
     file.write_text("data _null_;\n/*SUBMIT BEGIN*/\nproc print data=&indata;\nrun;&&indata;&indatabase;\n/*SUBMIT END*/\nrun;")
