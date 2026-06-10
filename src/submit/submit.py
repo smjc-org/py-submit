@@ -65,7 +65,7 @@ def _cut_code(
         elif start_match is None and end_match is not None:
             click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 NEGATIVE 模式的注释！", fg="yellow", err=True)
+            click.secho(f"警告：源文件 {file.name} 中未找到预期的 NEGATIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
 
     if positive:
         start_match = re.search(rf"{POSITIVE_COMMENT_BEGIN}", code, flags=re_flags)
@@ -78,7 +78,7 @@ def _cut_code(
         elif start_match is None and end_match is not None:
             click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释！", fg="yellow", err=True)
+            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
 
     # 替换宏变量
     if substitute:
@@ -220,7 +220,7 @@ def copy_directory(
         for file in filenames:
             fileabspath = dirpath / file
             if resolved_exclude_files and fileabspath in resolved_exclude_files:
-                click.secho(f"已排除文件：{fileabspath.absolute()}", fg="yellow")
+                click.secho(f"已排除文件：{fileabspath.absolute()}", fg="magenta")
                 continue
             if file.endswith(".sas"):
                 dirrelpath = dirpath.relative_to(sas_dir)
