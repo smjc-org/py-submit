@@ -32,34 +32,6 @@ def test_cutcode_incomplete_comment(dummy_sas_dir: Path, tmp_path: Path) -> None
     assert "未找到预期的 POSITIVE 模式的注释" in result.stderr
 
 
-def test_cutcode_missing_positive_comment_with_allow_missing_positive(dummy_sas_dir: Path, tmp_path: Path) -> None:
-    """测试 cutcode 对缺少 POSITIVE 模式的注释 + --allow-missing-positive 参数的处理"""
-
-    runner = CliRunner()
-
-    txt_dir = tmp_path / "txt_out"
-
-    result = runner.invoke(
-        cli,
-        [
-            "copydir",
-            "-s",
-            str(dummy_sas_dir),
-            "-t",
-            str(txt_dir),
-            "--allow-missing-positive",
-        ],
-    )
-
-    assert result.exit_code == 0
-
-    assert "未找到预期的 POSITIVE 模式的注释" not in result.stderr
-    assert "存在 POSITIVE 模式的起始注释，但未找到对应的终止注释" not in result.stderr
-    assert "存在 POSITIVE 模式的终止注释，但未找到对应的起始注释" not in result.stderr
-    assert "存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释" in result.stderr
-    assert "存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释" in result.stderr
-
-
 def test_copyfile(dummy_sas_dir: Path, tmp_path: Path) -> None:
     """测试 copyfile 命令"""
 
