@@ -61,9 +61,9 @@ def _cut_code(
         if start_match and end_match:
             code = re.sub(rf"{NEGATIVE_COMMENT_BEGIN}.*?{NEGATIVE_COMMENT_END}", "", code, flags=re_flags)
         elif start_match is not None and end_match is None:
-            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
+            click.secho(f"警告：源文件 {file.absolute()} 中存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释！", fg="yellow", err=True)
         elif start_match is None and end_match is not None:
-            click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
+            click.secho(f"警告：源文件 {file.absolute()} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="yellow", err=True)
         else:
             pass
 
@@ -74,11 +74,11 @@ def _cut_code(
             code_segaments = re.findall(rf"{POSITIVE_COMMENT_BEGIN}(.*?){POSITIVE_COMMENT_END}", code, re_flags)
             code = "\n\n".join(code.strip() for code in code_segaments)
         elif start_match is not None and end_match is None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
+            click.secho(f"警告：源文件 {file.absolute()} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="yellow", err=True)
         elif start_match is None and end_match is not None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
+            click.secho(f"警告：源文件 {file.absolute()} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="yellow", err=True)
         else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
+            click.secho(f"警告：源文件 {file.absolute()} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
 
     # 替换宏变量
     if substitute:
