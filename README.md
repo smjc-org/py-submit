@@ -19,13 +19,13 @@
 然后使用 `pip` 命令安装指定版本，例如：
 
 ```bash
-pip install git+https://github.com/smjc-org/py-submit.git@0.6.0
+pip install git+https://github.com/smjc-org/py-submit.git@0.6.1
 ```
 
 或者从特定 commit 安装：
 
 ```bash
-pip install git+https://github.com/smjc-org/py-submit.git@f0c72d7a9534b003b2b28cb46c18a2dc7da8b19e
+pip install git+https://github.com/smjc-org/py-submit.git@03006c6f8135997dcb5063de6b3522560a83153a
 ```
 
 上述命令会将本程序安装到环境变量中指定的目录下，并向系统注册 `submit` 命令以供后续调用。
