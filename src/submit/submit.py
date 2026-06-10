@@ -31,6 +31,7 @@ class CopyFileTask:
     negative: bool
     substitute: dict[str, str]
     encoding: str
+    allow_missing_positive: bool
 
 
 def _cut_code(
@@ -39,6 +40,7 @@ def _cut_code(
     negative: bool = True,
     substitute: dict[str, str] = {},
     encoding: str = "gbk",
+    allow_missing_positive: bool = False,
 ) -> None:
     """裁剪代码。
 
@@ -46,8 +48,9 @@ def _cut_code(
         file (Path): 代码文件路径。
         positive (bool): 是否处理 positive 模式的注释。
         negative (bool): 是否处理 negative 模式的注释，优先级高于 `positive`。
-        encoding (str, optional): 字符编码。
         substitute (dict[str, str], optional): 宏变量替换字典。
+        encoding (str, optional): 字符编码。
+        allow_missing_positive (bool, optional): 是否允许缺失 positive 模式的注释。
     """
 
     re_flags = re.I | re.S
@@ -67,18 +70,19 @@ def _cut_code(
         else:
             pass
 
-    if positive:
-        start_match = re.search(rf"{POSITIVE_COMMENT_BEGIN}", code, flags=re_flags)
-        end_match = re.search(rf"{POSITIVE_COMMENT_END}", code, flags=re_flags)
-        if start_match and end_match:
-            code_segaments = re.findall(rf"{POSITIVE_COMMENT_BEGIN}(.*?){POSITIVE_COMMENT_END}", code, re_flags)
-            code = "\n\n".join(code.strip() for code in code_segaments)
-        elif start_match is not None and end_match is None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
-        elif start_match is None and end_match is not None:
-            click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
-        else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
+    if not allow_missing_positive:
+        if positive:
+            start_match = re.search(rf"{POSITIVE_COMMENT_BEGIN}", code, flags=re_flags)
+            end_match = re.search(rf"{POSITIVE_COMMENT_END}", code, flags=re_flags)
+            if start_match and end_match:
+                code_segaments = re.findall(rf"{POSITIVE_COMMENT_BEGIN}(.*?){POSITIVE_COMMENT_END}", code, re_flags)
+                code = "\n\n".join(code.strip() for code in code_segaments)
+            elif start_match is not None and end_match is None:
+                click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的起始注释，但未找到对应的终止注释！", fg="red", err=True)
+            elif start_match is None and end_match is not None:
+                click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
+            else:
+                click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
 
     # 替换宏变量
     if substitute:
@@ -88,10 +92,18 @@ def _cut_code(
     return code.strip()
 
 
-def _copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, substitute: dict[str, str], encoding: str) -> None:
+def _copy_file(
+    sas_file: Path,
+    txt_file: Path,
+    positive: bool,
+    negative: bool,
+    substitute: dict[str, str],
+    encoding: str,
+    allow_missing_positive: bool,
+) -> None:
     """处理单个 sas 文件，保存处理后的代码到 txt 文件中。"""
 
-    code = _cut_code(sas_file, positive, negative, substitute, encoding)
+    code = _cut_code(sas_file, positive, negative, substitute, encoding, allow_missing_positive)
 
     txt_file_dir = txt_file.parent
     if not txt_file_dir.exists():
@@ -124,6 +136,12 @@ def cli() -> None:
 @click.option("--negative/--no-negative", is_flag=True, default=True, help="是否处理 negative 模式的注释，优先级高于 --positive")
 @click.option("-sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
+@click.option(
+    "--allow-missing-positive",
+    is_flag=True,
+    default=False,
+    help="允许缺失 positive 模式的注释。指定 --allow-missing-positive 时，选项 --positive/--no-positive 无效",
+)
 def copy_file(
     sas_file: Path,
     txt_file: Path,
@@ -131,12 +149,13 @@ def copy_file(
     negative: bool,
     substitute: tuple[tuple[str, str], ...],
     encoding: str,
+    allow_missing_positive: bool,
 ) -> None:
     """处理单个 sas 文件，保存处理后的代码到 txt 文件中。"""
 
     if substitute:
         substitute = dict(substitute)
-    _copy_file(sas_file, txt_file, positive, negative, substitute, encoding)
+    _copy_file(sas_file, txt_file, positive, negative, substitute, encoding, allow_missing_positive)
 
 
 @cli.command(name="copydir", help="处理指定目录下的所有 sas 文件，保存处理后的代码到指定目录中。")
@@ -158,6 +177,12 @@ def copy_file(
 @click.option("--negative/--no-negative", is_flag=True, default=True, help="是否处理 negative 模式的注释，优先级高于 --positive")
 @click.option("-sub", "--substitute", multiple=True, type=(str, str), default=(), help="宏变量替换键值对")
 @click.option("-e", "--encoding", default="gbk", type=str, help="字符编码，默认值为 gbk")
+@click.option(
+    "--allow-missing-positive",
+    is_flag=True,
+    default=False,
+    help="允许缺失 positive 模式的注释。指定 --allow-missing-positive 时，选项 --positive/--no-positive 无效",
+)
 @click.option("--merge/--no-merge", is_flag=True, help="是否将所有处理后的代码合并到一个文件中")
 @click.option("--merge-name", default="merged.txt", type=str, help="合并后的文件名，默认值为 merged.txt，仅当指定了 --merge 选项时有效")
 @click.option("-exd", "--exclude-dir", multiple=True, type=str, help="排除的目录路径模式")
@@ -169,6 +194,7 @@ def copy_directory(
     negative: bool = True,
     substitute: tuple[tuple[str, str], ...] = ((),),
     encoding: str = "gbk",
+    allow_missing_positive: bool = False,
     merge: bool = False,
     merge_name: str = "merged.txt",
     exclude_dir: tuple[str, ...] = (),
@@ -183,6 +209,7 @@ def copy_directory(
         negative (bool): 是否处理 negative 模式的注释，优先级高于 `positive`。
         substitute (tuple[tuple[str, str], ...]): 宏变量替换键值对。
         encoding (str): 字符编码。
+        allow_missing_positive (bool, optional): 是否允许缺失 positive 模式的注释。
         merge (bool): 是否将所有处理后的代码合并到一个文件中。
         merge_name (str): 合并后的文件名，默认值为 `'merged.txt'`，仅当 `merge` 选项为 True 时有效。
         exclude_file (tuple[Path, ...]): 排除的文件路径。
@@ -230,7 +257,13 @@ def copy_directory(
                 txt_file = txt_dir / dirrelpath / file.replace(".sas", ".txt")
                 copy_file_tasks.append(
                     CopyFileTask(
-                        sas_file=fileabspath, txt_file=txt_file, positive=positive, negative=negative, substitute=substitute, encoding=encoding
+                        sas_file=fileabspath,
+                        txt_file=txt_file,
+                        positive=positive,
+                        negative=negative,
+                        substitute=substitute,
+                        encoding=encoding,
+                        allow_missing_positive=allow_missing_positive,
                     )
                 )
 
@@ -259,5 +292,5 @@ def copy_directory(
         click.secho(f"已生成文件：{merge_file.absolute()}", fg="green")
     else:  # 不合并文件
         for task in copy_file_tasks:
-            _copy_file(task.sas_file, task.txt_file, task.positive, task.negative, task.substitute, task.encoding)
+            _copy_file(task.sas_file, task.txt_file, task.positive, task.negative, task.substitute, task.encoding, task.allow_missing_positive)
             click.secho(f"已转换文件：{task.sas_file.absolute()}", fg="green")
