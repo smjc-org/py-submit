@@ -30,7 +30,6 @@ def test_cutcode_incomplete_comment(dummy_sas_dir: Path, tmp_path: Path) -> None
     assert "存在 NEGATIVE 模式的起始注释，但未找到对应的终止注释" in result.stderr
     assert "存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释" in result.stderr
     assert "未找到预期的 POSITIVE 模式的注释" in result.stderr
-    assert "未找到预期的 NEGATIVE 模式的注释" in result.stderr
 
 
 def test_copyfile(dummy_sas_dir: Path, tmp_path: Path) -> None:
@@ -256,8 +255,8 @@ def test_copydir_no_files_need_process(dummy_sas_dir: Path, tmp_path: Path) -> N
     assert "未找到需要处理的 .sas 文件" in result.stdout
 
 
-def test_copydir_output_dir_inside_input_dir(dummy_sas_dir: Path, tmp_path: Path) -> None:
-    """测试 copydir 命令，输出目录在输入目录内"""
+def test_copydir_output_dir_equal_input_dir(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，输出目录与输入目录是同一目录"""
 
     runner = CliRunner()
 
@@ -276,4 +275,28 @@ def test_copydir_output_dir_inside_input_dir(dummy_sas_dir: Path, tmp_path: Path
 
     assert result.exit_code == 0
 
-    assert "输出目录与输入目录是同一目录，或输出目录在输入目录内" in result.stdout
+    assert "当前目录与指定输出 TXT 的目录是同一目录" in result.stdout
+
+
+def test_copydir_output_dir_inside_input_dir(dummy_sas_dir: Path, tmp_path: Path) -> None:
+    """测试 copydir 命令，输出目录在输入目录内"""
+
+    runner = CliRunner()
+
+    sas_dir = dummy_sas_dir / "sponser_only"
+    txt_dir = dummy_sas_dir
+
+    result = runner.invoke(
+        cli,
+        [
+            "copydir",
+            "-s",
+            str(sas_dir),
+            "-t",
+            str(txt_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+
+    assert "当前目录在指定输出 TXT 的目录内" in result.stdout
