@@ -50,15 +50,75 @@
   submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --no-positive
   ```
 
+> [!NOTE]
+>
+> 指定 `--positive` 时，若文件不包含 _positive_ 模式的注释，程序会发出警告，不进行裁剪处理。
+
 - `--negative/--no-negative`, _optional_ <span id="--negative/--no-negative"></span>
 
   指定是否处理 _negative_ 模式的注释，如未指定，默认使用 `--negative`。
 
-  📌 `--negative` 优先级高于 `--positive`，这意味着如果同时指定了 `--positive` 和 `--negative`，程序会优先处理 _negative_ 模式的注释。
-
   ```bash
   submit copyfile -s "./adam/adae.sas" -t "./output/adae.txt" --no-positive --no-negative
   ```
+
+
+> [!NOTE]
+>
+> `--negative` 优先级高于 `--positive`，如果同时指定 `--positive` 和 `--negative`，程序会优先处理 _negative_ 模式的注释。
+>
+> 举例来说，假设文件 `adsl.sas` 的内容如下：
+> ```sas
+> %let syscc = 0;
+>
+> dm log 'clear';
+> dm output 'clear';
+> dm odsresult 'clear';
+>
+> proc datasets lib=work kill memtype=data nolist;
+> quit;
+>
+> /* SUBMIT BEGIN */
+> proc sql noprint;
+>     create table adsl as
+>         select ...
+> quit;
+>
+> /* NOT SUBMIT BEGIN */
+> proc means data = adsl;
+>     var age;
+> run;
+> /* NOT SUBMIT END */
+>
+> proc sort data = adsl;
+>     by usubjid;
+> run;
+> /* SUBMIT END */
+>
+> %sm_log;
+> %error;
+> ```
+>
+> 运行以下命令：
+>
+> ```bash
+> submit copyfile -s "./adsl.sas" -t "./adsl.txt" --positive --negative
+> ```
+>
+> `adsl.txt` 的内容如下：
+>
+> ```txt
+> proc sql noprint;
+>     create table adsl as
+>         select ...
+> quit;
+>
+>
+>
+> proc sort data = adsl;
+>     by usubjid;
+> run;
+> ```txt
 
 - `-sub, --substitute`, _optional_ <span id="--substitute"></span>
 
@@ -98,7 +158,7 @@
 
 - `-t, --txt-dir`, _required_
 
-  指定裁剪后的 sas 代码保存的目录路径。
+  指定裁剪后的 sas 代码保存的目录路径，目录不存在时将自动创建。
   
   可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
@@ -138,6 +198,10 @@
 
   指定是否将所有处理后的代码合并到一个文件中。
 
+  ```bash
+  submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
+  ```
+
 > [!NOTE]
 >
 > 合并后的 `.txt` 文件包含源目录中所有未被 `--exclude-dir` 和 `--exclude-file` 排除的 sas 代码。
@@ -149,10 +213,6 @@
 >
 > 某些地方医疗器械监督管理局不接收压缩包作为递交文件，且递交文件数量存在限制，
 > 因此必须将所有 `.sas` 文件合并成一个单独的 `.txt` 文件。
-
-```bash
-submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
-```
 
 - `--merge-name`, _optional_
 

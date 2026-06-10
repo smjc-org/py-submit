@@ -1,0 +1,10 @@
+proc sql noprint;
+    create table adsl as
+        select ...
+quit;
+
+
+
+proc sort data = adsl;
+    by usubjid;
+run;
