@@ -118,7 +118,7 @@
 > proc sort data = adsl;
 >     by usubjid;
 > run;
-> ```txt
+> ```
 
 - `-sub, --substitute`, _optional_ <span id="--substitute"></span>
 
