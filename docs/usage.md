@@ -164,7 +164,7 @@ submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
 
 - `-exd, --exclude-dir`, _optional_
 
-  指定需排除的目录的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的目录中的 `.sas` 文件将被忽略。
+  指定需排除的目录的 [glob 模式](https://docs.python.org/zh-cn/3/library/pathlib.html#pattern-language)，所有匹配该模式的目录中的 `.sas` 文件将被忽略。
 
   该选项可以多次使用，指定多个排除目录。
 
@@ -174,7 +174,7 @@ submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
 
 - `-exf, --exclude-file`, _optional_
 
-  指定需排除的文件的 [glob 路径模式](#glob-模式介绍)，所有匹配该模式的文件将被忽略。
+  指定需排除的文件的 [glob 模式](https://docs.python.org/zh-cn/3/library/pathlib.html#pattern-language)，所有匹配该模式的文件将被忽略。
 
   ```bash
   submit copydir -s "./adam" -t "./output" --exclude-file "**/deprecated*.sas"
@@ -189,46 +189,3 @@ submit copydir -s "./adam" -t "./output" --substitute "id" "%str()" --merge
   ```bash
   submit copydir --help
   ```
-
-## glob 模式介绍
-
-`glob` 是一种使用通配符指定文件（目录）名称集合的模式，查看 [wiki](<https://en.wikipedia.org/wiki/Glob_(programming)>)。
-
-你可以在路径中使用以下特殊字符作为通配符：
-
-- `*`: 匹配任意数量的非分隔符型字符，包括零个。例如，`f*.sas` 匹配 `f1.sas`、`f2.sas`、`f3.sas` 等等。
-- `**`: 匹配任意数量的文件或目录分段，包括零个。例如，`**/f*.sas` 匹配 `figure/f1.sas`、`figure/f2.sas`、`figure/draft/f1.sas` 等等。
-- `?`: 匹配一个不是分隔符的字符。例如，`t1?.sas` 匹配 `t1.sas`、`t10.sas`、`t11.sas` 等等。
-- `[seq]`: 匹配在 seq 中的一个字符。例如，`[tfl]1.sas` 匹配 `t1.sas`、`f1.sas`、`l1.sas`。
-
-更多语法请查看 [模式语言](https://docs.python.org/zh-cn/3/library/pathlib.html#pattern-language)。
-
-假设有这样一个文件目录结构：
-
-```
-D:.
-├─source
-│  ├─f1.sas
-│  ├─f2.sas
-│  ├─f2-deprecated.sas
-│  ├─f3.sas
-│  ├─f3-deprecated.sas
-│  ├─t1.sas
-│  ├─t2.sas
-│  ├─t2-deprecated.sas
-│  ├─t2-deprecated-20241221.sas
-│  ├─t3.sas
-│  ├─t4.sas
-│  ├─t5.sas
-│  ├─t5-deprecated.sas
-│  ├─t6.sas
-│  ├─t7.sas
-│  └─t7-deprecated.sas
-└─dest
-```
-
-现在需要将 `source` 目录中的 `.sas` 文件转换为 `.txt` 文件，但忽略名称包含 `deprecated` 的文件，可以使用以下命令：
-
-```bash
-submit copydir --s "~/source" -t "~/dest" --exclude-file "*deprecated*.sas"
-```
