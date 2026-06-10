@@ -65,7 +65,7 @@ def _cut_code(
         elif start_match is None and end_match is not None:
             click.secho(f"源文件 {file.name} 中存在 NEGATIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 NEGATIVE 模式的注释！", fg="yellow", err=True)
+            pass
 
     if positive:
         start_match = re.search(rf"{POSITIVE_COMMENT_BEGIN}", code, flags=re_flags)
@@ -78,7 +78,7 @@ def _cut_code(
         elif start_match is None and end_match is not None:
             click.secho(f"源文件 {file.name} 中存在 POSITIVE 模式的终止注释，但未找到对应的起始注释！", fg="red", err=True)
         else:
-            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释！", fg="yellow", err=True)
+            click.secho(f"警告：源文件 {file.name} 中未找到预期的 POSITIVE 模式的注释，将不裁剪任何代码！", fg="yellow", err=True)
 
     # 替换宏变量
     if substitute:
@@ -214,13 +214,16 @@ def copy_directory(
         if resolved_exclude_dirs and dirpath in resolved_exclude_dirs:
             click.secho(f"已排除目录：{dirpath.absolute()}", fg="magenta")
             continue
-        if txt_dir in dirpath.parents or dirpath == txt_dir:  # 如果当前目录是目标目录或其子目录，则跳过
-            click.secho(f"已跳过目录：{dirpath.absolute()}，跳过原因：输出目录与输入目录是同一目录，或输出目录在输入目录内", fg="magenta")
+        if txt_dir in dirpath.parents:  # 如果当前目录在指定输出 TXT 的目录内，则跳过
+            click.secho(f"已跳过目录：{dirpath.absolute()}，跳过原因：当前目录在指定输出 TXT 的目录内", fg="magenta")
+            continue
+        if dirpath == txt_dir:  # 如果当前目录与指定输出 TXT 的目录是同一目录，则跳过
+            click.secho(f"已跳过目录：{dirpath.absolute()}，跳过原因：当前目录与指定输出 TXT 的目录是同一目录", fg="magenta")
             continue
         for file in filenames:
             fileabspath = dirpath / file
             if resolved_exclude_files and fileabspath in resolved_exclude_files:
-                click.secho(f"已排除文件：{fileabspath.absolute()}", fg="yellow")
+                click.secho(f"已排除文件：{fileabspath.absolute()}", fg="magenta")
                 continue
             if file.endswith(".sas"):
                 dirrelpath = dirpath.relative_to(sas_dir)
@@ -232,7 +235,7 @@ def copy_directory(
                 )
 
     if not copy_file_tasks:
-        click.secho("未找到需要处理的 .sas 文件")
+        click.secho("未找到需要处理的 .sas 文件", fg="yellow")
         return
 
     if merge:  # 合并文件
