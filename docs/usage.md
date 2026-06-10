@@ -30,13 +30,13 @@
 
 ## `copyfile`
 
-- `-s, -sas-file`, _required_
+- `-s, --sas-file`, _required_
 
   指定需裁剪的 `.sas` 文件路径。
   
   可以使用绝对路径和相对路径，使用相对路径时，以执行 `submit` 命令的终端的当前目录为根。
 
-- `-t, -txt-file`, _required_
+- `-t, --txt-file`, _required_
 
   指定裁剪后的代码保存的 `.txt` 文件路径。
   
