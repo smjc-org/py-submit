@@ -1,6 +1,6 @@
 [project]
 name = "submit"
-version = "0.6.0"
+version = "0.6.1"
 description = "Crop the SAS code to meet the submission requirements"
 readme = "README.md"
 requires-python = ">=3.10"
