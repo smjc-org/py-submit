@@ -1,12 +1,10 @@
 # author: @Snoopy1866
 
 import re
-
 from dataclasses import dataclass
 from pathlib import Path
 
 import click
-
 from natsort import index_natsorted
 
 SYLBOMS = r"[\s\*\-\=]"
@@ -50,7 +48,7 @@ def _cut_code(
         substitute (dict[str, str], optional): 宏变量替换字典。
     """
 
-    re_flags = re.I | re.S
+    re_flags = re.IGNORECASE | re.DOTALL
 
     code = file.read_text(encoding=encoding)
 
@@ -102,7 +100,6 @@ def _copy_file(sas_file: Path, txt_file: Path, positive: bool, negative: bool, s
 @click.group()
 def cli() -> None:
     """sas 代码裁剪工具"""
-    pass
 
 
 @cli.command(name="copyfile", help="处理单个 sas 文件，保存处理后的代码到 txt 文件中。")
